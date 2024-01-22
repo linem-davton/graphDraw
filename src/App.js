@@ -11,7 +11,9 @@ function App() {
   const [validationMessage, setValidationMessage] = useState('');
   const [detectedCycles, setdetectedCycles] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [deleteMode, setDeleteMode] = useState(false);  
+  const [deleteMode, setDeleteMode] = useState(false); 
+  
+  const [f_det_tasks, setf_det_tasks] = useState([]);
   
   const addNode = () => {
     const nodeName = prompt('Enter node name:');
@@ -44,12 +46,21 @@ function App() {
     
   };
 
+const faultDetection = () => {
+    // Should mark the nodes with a red outline and set the state 
+      console.log("Fault Detection");
+      const f_det_task = prompt('Enter task id:');
+      setf_det_tasks(prevf_det_tasks => ([...prevf_det_tasks, f_det_task]));
+    };
+
+
 return (
   <div className="app-container">
       <div className="sidebar">
         <button className="button" onClick={addNode}>Add Node</button>
         <button className="button"  onClick={addEdge}>Add Edge</button>  
-        <button className="button" onClick={() => handleValidateGraph(setValidationMessage, setdetectedCycles, setIsLoading, graph)}>Validate Graph</button>
+        <button className="button" onClick={faultDetection}>Add Fault Detection</button>
+        <button className="button" onClick={() => handleValidateGraph(setValidationMessage, setdetectedCycles, setIsLoading, graph , f_det_tasks)}>Validate Graph</button>
         <label className="checkbox-label">
           <input type="checkbox" id="deleteMode" checked={deleteMode} onChange={() => {
             setDeleteMode(!deleteMode);

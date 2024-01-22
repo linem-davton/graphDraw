@@ -1,7 +1,7 @@
 //For utility functions related to graph processing.
-export const handleValidateGraph = async (setValidationMessage, setdetectedCycles, setIsLoading, graph) => {
+export const handleValidateGraph = async (setValidationMessage, setdetectedCycles, setIsLoading, graph , f_det_tasks) => {
     setIsLoading(true);
-    const graphJson = generateGraphJson(graph);
+    const graphJson = generateGraphJson(graph , f_det_tasks);
     const response = await sendGraphToBackend(graphJson);
     setIsLoading(false);
     
@@ -14,7 +14,7 @@ export const handleValidateGraph = async (setValidationMessage, setdetectedCycle
     
   };
   
-const generateGraphJson = (graph) => {
+const generateGraphJson = (graph , f_det_tasks) => {
     // Convert nodes to a format suitable for NetworkX (if needed)
     const nodesJson = graph.nodes.map(node => {
       return { task_id: node.id}; // Replace 'otherAttributes' with any other node data you have
@@ -22,9 +22,11 @@ const generateGraphJson = (graph) => {
   
     // Convert edges to a format suitable for NetworkX
     const linksJson = graph.edges.map(edge => ({ source: edge.target, target: edge.source }));
+
   
     // Combine nodes and edges into a single object
-    const graphJson = { nodes: nodesJson, links: linksJson };
+    const graphJson = { nodes: nodesJson, links: linksJson, f_det_tasks: f_det_tasks };
+    
   
     console.log("Graph JSON for NetworkX:", graphJson);
     return graphJson;
