@@ -1,14 +1,16 @@
 //For utility functions related to graph processing.
-export const handleValidateGraph = async (setValidationMessage, setdetectedCycles, setIsLoading, graph , f_det_tasks) => {
+export const handleValidateGraph = async (setValidationMessage, setdetectedCycles, setIsLoading, graph , highlightNodes) => {
     setIsLoading(true);
-    const graphJson = generateGraphJson(graph , f_det_tasks);
+    const graphJson = generateGraphJson(graph , highlightNodes);
     const response = await sendGraphToBackend(graphJson);
     setIsLoading(false);
     
-    if (response) {
-      setValidationMessage(response.validation);
+    if (response.Error) {
+      setValidationMessage( response.Error);
       setdetectedCycles(response.cycles);
-    } else {
+    } else if (response.valid) {
+      setValidationMessage(response.ok); 
+    }else {
       setValidationMessage("Error communicating with the server.");
     }
     
