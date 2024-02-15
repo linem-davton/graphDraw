@@ -12,9 +12,9 @@ function App() {
   const [detectedCycles, setdetectedCycles] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [deleteMode, setDeleteMode] = useState(false); 
-  const [highlight, setHighlight] = useState(false);
+  const [highlight, setHighlight] = useState(true);
   
-  const [highlightNodes, setHighlightesNodes] = useState([]);
+  const [highlightNodes, setHighlightedNodes] = useState([]);
   
   const addNode = () => {
     const nodeName = prompt('Enter node name:');
@@ -49,9 +49,10 @@ function App() {
 
 const togglehighlightNodes = () => {
     // Should mark the nodes with a red outline and set the state to highlight
-    setHighlight(!highlight);
-      const highlight_node = prompt('Enter task id:');
-      setHighlightesNodes(prevNodes => ([...prevNodes, highlight_node]));
+      setHighlight(!highlight);
+      console.log("highlighting nodes", highlight);
+      //const highlight_node = prompt('Enter task id:');
+      //setHighlightedNodes(prevNodes => ([...prevNodes, highlight_node]));
     };
 
 
@@ -85,6 +86,9 @@ return (
             deleteMode={deleteMode}
             setSelectedNode={setSelectedNode}
             setSelectedEdge={setSelectedEdge}
+            highlight={highlight}
+            setHighligtedNodes={setHighlightedNodes}
+            highlightNodes={highlightNodes}
         /></div> </div>
     <div className="validation-message">
       {validationMessage} <br />

@@ -6,14 +6,13 @@ export const handleValidateGraph = async (setValidationMessage, setdetectedCycle
     setIsLoading(false);
     
     if (response.Error) {
-      setValidationMessage( response.Error);
+      setValidationMessage(response.Error);
       setdetectedCycles(response.cycles);
     } else if (response.valid) {
-      setValidationMessage(response.ok); 
+      setValidationMessage(JSON.stringify(response.valid)); 
     }else {
       setValidationMessage("Error communicating with the server.");
     }
-    
   };
   
 const generateGraphJson = (graph , f_det_tasks) => {
@@ -27,7 +26,7 @@ const generateGraphJson = (graph , f_det_tasks) => {
 
   
     // Combine nodes and edges into a single object
-    const graphJson = { nodes: nodesJson, links: linksJson, f_det_tasks: f_det_tasks };
+    const graphJson = { nodes: nodesJson, links: linksJson, highlighted: f_det_tasks };
     
   
     console.log("Graph JSON for NetworkX:", graphJson);

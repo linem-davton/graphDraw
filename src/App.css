@@ -11,6 +11,7 @@
   --svg-border: #636e72;
   --svg-container: #353b48;
   --svg-circle-fill:#00b894;
+  --svg-circle-selected:red;
   --svg-cirlce-stroke: #dfe6e9;
   --svg-line-stroke: #dfe6e9;
 }
@@ -118,7 +119,9 @@ html, body {
   stroke: var(--svg-cirlce-stroke); /* Stroke color */
   stroke-width: 2px; /* Stroke width */
 }
-
+.svg-container svg circle.highlighted-circle {
+  fill: var(--svg-circle-selected);
+}
 /* Style for text within the SVG */
 .svg-container svg text {
   fill: var(--text-color); /* White color for better contrast */

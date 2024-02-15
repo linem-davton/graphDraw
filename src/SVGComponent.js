@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import { getRandomPosition, calculateIntersectionPoint } from './utility';
 
-const SVGComponent = ({graph, setGraph, deleteMode, setSelectedNode, setSelectedEdge}) => {
+const SVGComponent = ({graph, setGraph, deleteMode, setSelectedNode, setSelectedEdge , highlight, setHighligtedNodes, highlightNodes}) => {
     const svgRef = useRef();
     
     let dragStartPosition = { x: null, y: null };
@@ -31,7 +31,16 @@ const SVGComponent = ({graph, setGraph, deleteMode, setSelectedNode, setSelected
                     const newNodes = prevGraph.nodes.filter(node => node.id !== d.id);
                     const newEdges = prevGraph.edges.filter(edge => edge.source !== d.id && edge.target !== d.id);
             return { nodes: newNodes, edges: newEdges };
-          });}
+            });}
+            if (highlight) {
+                setHighligtedNodes(nodes => {
+                    if (nodes.includes(d.id)) {
+                        return nodes.filter(node => node !== d.id);
+                    }
+                    return [...nodes, d.id];
+                });
+                console.log("highlighting node", d.id, "highlight", highlight);
+          }
         }
     // Update node position in state if necessary on Drag End
         setGraph(prevGraph => {
@@ -60,6 +69,7 @@ const SVGComponent = ({graph, setGraph, deleteMode, setSelectedNode, setSelected
             .attr("r", nodeRadius)
             .attr("cx", d => d.x)
             .attr("cy", d => d.y)
+            .classed("highlighted-circle", d => highlightNodes.includes(d.id)) // Apply class based on highlighted nodes
             // ... rest of the node styling and event handlers
             .call(d3.drag()
             .on("start", onDragStart)
