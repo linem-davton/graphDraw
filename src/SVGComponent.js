@@ -29,7 +29,7 @@ const SVGComponent = ({graph, setGraph, deleteMode, setSelectedNode, setSelected
             if (deleteMode) {
                 setGraph(prevGraph => {
                     const newNodes = prevGraph.nodes.filter(node => node.id !== d.id);
-                    const newEdges = prevGraph.edges.filter(edge => edge.source !== d.id && edge.target !== d.id);
+                    const newEdges = prevGraph.edges.filter(edge => (edge.source !== d.id && edge.target !== d.id));
             return { nodes: newNodes, edges: newEdges };
             });}
             if (highlight) {
@@ -99,7 +99,7 @@ const SVGComponent = ({graph, setGraph, deleteMode, setSelectedNode, setSelected
         
         // Render edges
         svg.selectAll("line")
-            .data(graph.edges)
+            .data(graph.edges, e => e.id)
             .enter()
             .append("line")
             .attr("x1", edge => {
@@ -125,11 +125,20 @@ const SVGComponent = ({graph, setGraph, deleteMode, setSelectedNode, setSelected
             .attr('marker-end', 'url(#arrowhead)')
             .style("stroke", "black")
             .style("stroke-width", 2)
-            .on("click", d => {
-            console.log("Edge clicked", d);
-            setSelectedEdge(d);
-            setSelectedNode(null); // Deselect any selected node
+            .on("click", edge => {
+            console.log("Edge clicked", edge);
+             if (deleteMode) {
+            // Delete mode is active, delete the selected edge
+            setGraph(prevGraph => {
+                const newEdges = prevGraph.edges.filter(e => e.id !== edge.id); // Assuming edges have unique ids
+                // Nodes are not affected by edge deletion
+                return { ...prevGraph, edges: newEdges };
             });
+            } else {
+                setSelectedEdge(edge);
+                setSelectedNode(null); // Deselect any selected node
+            }
+        });
     
         // ... Any additional rendering logic
         // Define the arrowhead marker

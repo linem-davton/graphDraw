@@ -9,7 +9,8 @@ export const handleValidateGraph = async (setValidationMessage, setdetectedCycle
       setValidationMessage(response.Error);
       setdetectedCycles(response.cycles);
     } else if (response.valid) {
-      setValidationMessage(JSON.stringify(response.valid)); 
+      setValidationMessage(JSON.stringify(response.valid));
+      setdetectedCycles(response.cycles); 
     }else {
       setValidationMessage("Error communicating with the server.");
     }

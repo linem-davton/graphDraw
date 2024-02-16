@@ -19,8 +19,8 @@ function App() {
   const addNode = () => {
     const nodeName = prompt('Enter node name:');
     if (nodeName) {
-      const initialX = getRandomPosition(800); // Assuming SVG width is 800
-      const initialY = getRandomPosition(600); 
+      const initialX = getRandomPosition(400); // Assuming SVG width is 800
+      const initialY = getRandomPosition(400); 
       setGraph(prevGraph => ({
         ...prevGraph,
         nodes: [...prevGraph.nodes, { id: nodeName, x: initialX, y: initialY }]
