@@ -17,13 +17,15 @@ function App() {
   const [highlightNodes, setHighlightedNodes] = useState([]);
   
   const addNode = () => {
-    const nodeName = prompt('Enter node name:');
+    //const nodeName = prompt('Enter node name:');
+    const nodeName = (graph.nodes.length + 1);
+    console.log("Node name is", nodeName)
     if (nodeName) {
       const initialX = getRandomPosition(400); // Assuming SVG width is 800
       const initialY = getRandomPosition(400); 
       setGraph(prevGraph => ({
         ...prevGraph,
-        nodes: [...prevGraph.nodes, { id: nodeName, x: initialX, y: initialY }]
+        nodes: [...prevGraph.nodes, { id: nodeName.toString(), x: initialX, y: initialY }]
       }));
     }
     console.log("Added node with nodeName id");
