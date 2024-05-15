@@ -37,7 +37,7 @@ const generateGraphJson = (graph , f_det_tasks) => {
   
 const sendGraphToBackend = async (graphJson) => {
     try {
-      const response = await fetch('http://localhost:5001/validate_graph', {
+      const response = await fetch('http://localhost:8000/validate_graph', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

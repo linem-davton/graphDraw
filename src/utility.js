@@ -1,4 +1,7 @@
-export const getRandomPosition = (max) => Math.floor(Math.random() * max);
+export const getRandomPosition = (max) => Math.floor(Math.random() * max)+50;
+
+
+
  
 export const calculateIntersectionPoint = (source, target, nodeRadius) => {
   const dx = target.x - source.x;
