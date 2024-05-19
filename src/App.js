@@ -142,6 +142,7 @@ const displayGraph = () => {
       });
     }
     setGraph({ nodes: newNodes, edges: newEdges });
+    console.log(jsonData)
   }
 };
 
@@ -159,8 +160,9 @@ const scheduleGraph = async (jsonData) => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(jsonData),
       
+      body: JSON.stringify(jsonData),
+     
     });
     
     if (!response.ok) {
