@@ -210,3 +210,7 @@ By following these steps, you can set up the project locally, understand its str
 5. Use CSS for the Visualisation of the Schedule.
 6. Mention the name of the algorithms above the bar graphs for clarity. 
 7. Add save/export button.
+8. Change the jsonData to graph object. 
+9. remove validate graph.
+10. check if the graph is cyclic or not.
+11. ldf and edf in single core(imp)

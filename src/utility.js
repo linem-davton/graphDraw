@@ -1,15 +1,32 @@
-export const getRandomPosition = (max) => Math.floor(Math.random() * max)+50;
+/*export const getRandomPosition = (max) => Math.floor(Math.random() * max)+50;
 
 
 
  
-export const calculateIntersectionPoint = (source, target, nodeRadius) => {
-  const dx = target.x - source.x;
-  const dy = target.y - source.y;
+// utility.js
+export const calculateIntersectionPoint = (sourceNode, targetNode, nodeRadius) => {
+  const dx = targetNode.x - sourceNode.x;
+  const dy = targetNode.y - sourceNode.y;
   const distance = Math.sqrt(dx * dx + dy * dy);
-  const ratio = (distance - nodeRadius) / distance;
+  const ratio = nodeRadius / distance;
 
-  const x = source.x + ratio * dx;
-  const y = source.y + ratio * dy;
-  return { x, y };
+  return {
+      x: sourceNode.x + dx * ratio,
+      y: sourceNode.y + dy * ratio
+  };
+};
+*/
+// utility.js
+export const getRandomPosition = (max) => Math.floor(Math.random() * max) + 50;
+
+export const calculateIntersectionPoint = (sourceNode, targetNode, nodeRadius) => {
+  const dx = targetNode.x - sourceNode.x;
+  const dy = targetNode.y - sourceNode.y;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+  const ratio = nodeRadius / distance;
+
+  return {
+    x: sourceNode.x + dx * ratio,
+    y: sourceNode.y + dy * ratio
+  };
 };

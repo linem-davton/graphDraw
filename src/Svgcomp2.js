@@ -21,28 +21,21 @@ const SVGComponent = ({ graph, setGraph, deleteMode, setSelectedNode, setSelecte
     };
 
     const onDragEnd = (event, d) => {
-        const dx = event.x - dragStartPosition.x;
-        const dy = event.y - dragStartPosition.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-
-        if (distance < 5) {  // Threshold for treating the action as a click and not a drag
-            if (deleteMode) {
-                setGraph(prevGraph => {
-                    const newNodes = prevGraph.nodes.filter(node => node.id !== d.id);
-                    const newEdges = prevGraph.edges.filter(edge => (edge.source !== d.id && edge.target !== d.id));
-                    return { nodes: newNodes, edges: newEdges };
-                });
+        const minDistance = 40; // Minimum distance to maintain between nodes
+        const updatedNodes = graph.nodes.map(node => {
+            if (node.id !== d.id) {
+                const distance = Math.sqrt((node.x - event.x) ** 2 + (node.y - event.y) ** 2);
+                if (distance < minDistance) {
+                    // Calculate new positions to prevent overlap
+                    const angle = Math.atan2(node.y - event.y, node.x - event.x);
+                    const newX = event.x + minDistance * Math.cos(angle);
+                    const newY = event.y + minDistance * Math.sin(angle);
+                    return { ...node, x: newX, y: newY };
+                }
             }
-            if (highlight) {
-                setHighligtedNodes(nodes => {
-                    if (nodes.includes(d.id)) {
-                        return nodes.filter(node => node !== d.id);
-                    }
-                    return [...nodes, d.id];
-                });
-            }
-        }
-
+            return node;
+        });
+        
         setGraph(prevGraph => {
             const updatedNodes = prevGraph.nodes.map(node => {
                 if (node.id === d.id) {
@@ -53,13 +46,42 @@ const SVGComponent = ({ graph, setGraph, deleteMode, setSelectedNode, setSelecte
             return { ...prevGraph, nodes: updatedNodes };
         });
     };
+    const detectCollision = (node1, node2) => {
+        const nodeRadius = 20;
+        const dx = node1.x - node2.x;
+        const dy = node1.y - node2.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        return distance < 2 * nodeRadius; // Assuming nodeRadius is the radius of your nodes
+    };
+    
+    // Function to adjust node positions to prevent collisions
+    const avoidCollisions = nodes => {
+        const nodeRadius = 20;
+        const padding = 10; // Padding to ensure nodes don't overlap after adjustment
+    
+        for (let i = 0; i < nodes.length; i++) {
+            for (let j = i + 1; j < nodes.length; j++) {
+                if (detectCollision(nodes[i], nodes[j])) {
+                    const dx = nodes[i].x - nodes[j].x;
+                    const dy = nodes[i].y - nodes[j].y;
+                    const angle = Math.atan2(dy, dx);
+                    const overlap = 2 * nodeRadius - Math.sqrt(dx * dx + dy * dy) + padding;
+                    nodes[i].x += overlap / 2 * Math.cos(angle);
+                    nodes[i].y += overlap / 2 * Math.sin(angle);
+                    nodes[j].x -= overlap / 2 * Math.cos(angle);
+                    nodes[j].y -= overlap / 2 * Math.sin(angle);
+                }
+            }
+        }
+        return nodes;
+    };
 
     useEffect(() => {
         const svg = d3.select(svgRef.current);
         svg.selectAll("*").remove(); // Clear previous render
 
         const nodeRadius = 20;
-
+        const updatedNodes = avoidCollisions(graph.nodes);
         svg.selectAll("circle")
             .data(graph.nodes, d => d.id)
             .join(
