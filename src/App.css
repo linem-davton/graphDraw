@@ -1,42 +1,133 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+/* App.css */
+
+/* Define color variables */
+:root {
+  --main-bg: #2d3436;
+  --sidebar-bg: #191b1b;
+  --button-bg: #00b894 ;
+  --button-hover-bg: #09856a;
+  --text-color: #dfe6e9 ;
+  --spinner-color: #00b894;
+  --svg-border: #636e72;
+  --svg-container: #353b48;
+  --svg-circle-fill:#00b894;
+  --svg-circle-selected:red;
+  --svg-cirlce-stroke: #dfe6e9;
+  --svg-line-stroke: #dfe6e9;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+
+/* Styles for the app layout */
+.app-container {
+  display: flex;
+  flex-direction: row;
+  min-height: 100vh; /* Full height of the viewport */
+  background: var(--main-bg); /* Light gray background for the whole app */
+}
+
+.sidebar {
+  width: 15%;
+  background: var(--sidebar-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 20px; /* Padding around the sidebar content */
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+.main-content {
+  flex-grow: 1; 
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  height: 100%;
+}
+/* Button Styling */
+.button, .checkbox-label {
+  background-color: var(--button-bg); /* Blue color for buttons */
+  color: var(--text-color);
+  padding: 20px; /* Increased padding for more height */
+  margin-bottom: 10px; /* Space between buttons */
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
   text-align: center;
+  transition: background-color 0.3s ease;
+  display: block; 
+  min-height: 50px; /* Define a minimum height for buttons */
+  line-height: 50px; /* Center text vertically */
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
+.button:hover,
+.checkbox-label:hover {
+  background-color:var(--button-hover-bg); /* Darker blue on hover */
 }
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+.checkbox-label input[type="checkbox"] {
+  display: none; /* Hide the actual checkbox */
 }
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.checkbox-label input[type="checkbox"]:checked + span {
+  text-decoration: line-through; /* Example style to show the checkbox is active */
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.checkbox-label span {
+  vertical-align: middle; /* Align span text with the middle of the label */
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+/* Validation Message */
+
+
+/* Styles for the SVG container */
+.svg-container {
+  width: 50%;
+  height:100%; /* Full width of its container */
+  justify-content: flex-start;
+}
+.schedule-data {
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+  height:100%; /* Full width of its container */
+}
+.svg-container svg {
+  width: 100%;
+  height: 100%;
+  border: 1px solid var(--svg-border); /* Blue border to match buttons */
+  background: var(--svg-container); /* Darker background to match buttons */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Subtle shadow around SVG */
 }
 
-.card {
-  padding: 2em;
+.svg-container svg circle,
+.svg-container svg line {
+  transition: all 0.3s ease;
 }
 
-.read-the-docs {
-  color: #888;
+/* Style for nodes (circles) within the SVG */
+.svg-container svg circle {
+  fill: var(--svg-circle-fill); /* Fill color for the nodes */
+  stroke: var(--svg-cirlce-stroke); /* Stroke color */
+  stroke-width: 1px; /* Stroke width */
 }
+
+.svg-container svg g circle.highlighted-circle {
+  fill: var(--svg-circle-selected, red) !important; /* Red color for selected nodes */
+}
+
+/* Style for text within the SVG */
+.svg-container svg text {
+  fill: var(--text-color); /* White color for better contrast */
+  font-size: 5px; /* Adjust as needed */
+}
+
+/* Style for edges (lines) within the SVG */
+.svg-container svg line {
+  stroke: var(--svg-line-stroke); /* Stroke color */
+  stroke-width: 1px; /* Stroke width */
+}
+/* Add more styles as per your preference */

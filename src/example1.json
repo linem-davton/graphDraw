@@ -1,0 +1,160 @@
+{
+    "application": {
+	"jobs": [
+	    {
+		"id": 0,
+		"wcet_fullspeed": 20,
+		"mcet": 10,
+		"deadline": 250,
+		"can_run_on": [2,5,6],
+		"start_time":0
+	    },
+	    {
+		"id": 1,
+		"wcet_fullspeed": 20,
+		"mcet": 10,
+		"deadline": 250,
+		"can_run_on": [1,4],
+		"start_time":0
+	    },
+	    {
+		"id": 2,
+		"wcet_fullspeed": 20,
+		"mcet": 10,
+		"deadline": 300,
+		"start_time":0
+	    },
+	    {
+		"id": 3,
+		"wcet_fullspeed": 20,
+		"mcet": 10,
+		"deadline": 256,
+		"start_time":0
+	    }
+	],
+	"messages": [
+	    {
+		"id": 0,
+		"sender": 1,
+		"receiver": 0,
+		"size": 40,
+		"timetriggered": true
+	    },
+	    {
+		"id": 1,
+		"sender": 2,
+		"receiver": 1,
+		"size": 40,
+		"timetriggered": true
+	    },
+	    {
+		"id": 2,
+		"sender": 3,
+		"receiver": 1,
+		"size": 40,
+		"timetriggered": true
+	    }
+	]
+    },
+    "platform": {
+	"nodes": [
+	    {
+		"id": 0,
+		"is_router": false
+	    },
+	    {
+		"id": 1,
+		"is_router": false
+	    },
+	    {
+		"id": 2,
+		"is_router": false
+	    },
+	    {
+		"id": 3,
+		"is_router": false
+	    },
+	    {
+		"id": 4,
+		"is_router": false
+	    },
+	    {
+		"id": 5,
+		"is_router": false
+	    },
+	    {
+		"id": 6,
+		"is_router": false
+	    },
+	    {
+		"id": 7,
+		"is_router": true
+	    },
+	    {
+		"id": 8,
+		"is_router": true
+	    },
+	    {
+		"id": 9,
+		"is_router": true
+	    }
+	],
+	"links": [
+	    {
+		"start": 0,
+		"end": 7
+	    },
+	    {
+		"start": 1,
+		"end": 7
+	    },
+	    {
+		"start": 7,
+		"end": 8
+	    },
+	    {
+		"start": 2,
+		"end": 8
+	    },
+	    {
+		"start": 3,
+		"end": 8
+	    },
+	    {
+		"start": 4,
+		"end": 8
+	    },
+	    {
+		"start": 8,
+		"end": 9
+	    },
+	    {
+		"start": 7,
+		"end": 9
+	    },
+	    {
+		"start": 5,
+		"end": 9
+	    },
+	    {
+		"start": 6,
+		"end": 9
+	    }
+	],
+	"frequencies": [500, 1000],
+	"schemes": [
+	    {
+		"id": 0,
+		"wcdt": 0,
+		"wcct": 0,
+		"wccr": 1
+	    },
+	    {
+		"id": 1,
+		"wcdt": 10,
+		"wcct": 10,
+		"wccr": 0.5
+	    }
+	]
+    }
+}
