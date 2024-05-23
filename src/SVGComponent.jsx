@@ -12,7 +12,16 @@ const SVGComponent = ({ graph, setGraph, deleteMode, setSelectedNode, setSelecte
 
   const onDragStart = (event, d) => {
     d3.select(event.sourceEvent.target).raise(); // Bring to front
-    dragStartPosition = { x: event.x, y: event.y };
+    dragStartPosition = {
+      x: e        "sender": "0",
+      "receiver": "2",
+      "size": 220
+    },
+    {
+      "sender": "1",
+      "receiver": "2",
+      "size": 250vent.x, y: event.y
+    };
   };
 
   const onDrag = (event, d) => {
