@@ -3,6 +3,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import './App.css';
 import SVGComponent from './SVGComponent';
 import ScheduleVisualization from './ScheduleVisualization';
+import Typography from '@mui/material/Typography';
+import Container from '@mui/material/Container';
+import Link from '@mui/material/Link';
 
 function App() {
   const [graph, setGraph] = useState({ nodes: [], edges: [] });
@@ -266,6 +269,15 @@ function App() {
             setHighligtedNodes={setHighlightedNodes}
             highlightNodes={highlightNodes}
           />
+          <footer style={{ padding: '20px 0', marginTop: 'auto' }}>
+            <Container maxWidth="sm">
+              <Typography variant="body1" align="center">
+                <Link href="https://github.com/linem-davton/graphdraw-frontend" underline="hover" sx={{ padding: '20px' }} target="_blank" rel="noopener noreferrer">GitHub Frontend</Link>
+                <Link href="https://github.com/linem-davton/es-lab-task2" underline="hover" sx={{ padding: '20px' }} target="_blank" rel="noopener noreferrer">GitHub Backend</Link>
+                <Link href="https://eslab2docs.pages.dev/" underline="hover" sx={{ padding: '20px' }} target="_blank" rel="noopener noreferrer">Task Documentation </Link>
+              </Typography>
+            </Container>
+          </footer>
         </div>
 
 
@@ -275,6 +287,7 @@ function App() {
           <ScheduleVisualization schedules={scheduleData} />
 
         </div> </div>
+
 
 
 
