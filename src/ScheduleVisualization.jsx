@@ -17,9 +17,13 @@ const Test1 = ({ schedules }) => {
         const g = svg.append('g')
           .attr('transform', `translate(${margin.left}, ${margin.top})`);
 
-        const nodes = Array.from(new Set(schedules[scheduleKey].map(job => job.node_id)));
-        const maxEndTime = d3.max(schedules[scheduleKey].map(job => job.end_time));
-        const start_time = d3.min(schedules[scheduleKey].map(job => job.start_time)); // Calculate the minimum start_time
+        const nodes = Array.from(new Set(schedules[scheduleKey].schedule.map(job => job.node_id)));
+        const maxEndTime = d3.max(schedules[scheduleKey].schedule.map(job => job.end_time));
+        const start_time = d3.min(schedules[scheduleKey].schedule.map(job => job.start_time)); // Calculate the minimum start_time
+
+        console.log('start_time', start_time);
+        console.log('maxEndTime', maxEndTime);
+        console.log('nodes', nodes);
 
         const xScale = d3.scaleLinear()
           .domain([start_time, maxEndTime]) // Adjust the domain to include start_time
@@ -68,7 +72,7 @@ const Test1 = ({ schedules }) => {
           .text(algorithmName)
           .style('fill', '#00b894');
 
-        const schedule = schedules[scheduleKey];
+        const schedule = schedules[scheduleKey].schedule
 
         g.selectAll('.bar')
           .data(schedule)
