@@ -9,15 +9,12 @@ import Link from '@mui/material/Link';
 
 function App() {
   const [graph, setGraph] = useState({ nodes: [], edges: [] });
-  const [isLoading, setIsLoading] = useState(false);
-  const [selectedNode, setSelectedNode] = useState(null);
-  const [selectedEdge, setSelectedEdge] = useState(null);
   const [deleteMode, setDeleteMode] = useState(false);
-  const [highlight, setHighlight] = useState(false);
   const [jsonData, setJsonData] = useState(null);
   const [scheduleData, setScheduleData] = useState(null);
+  const [errorMessage, setErrorMessage] = useState('');
 
-  const [highlightNodes, setHighlightedNodes] = useState([]);
+  const [highlightNode, setHighlightedNode] = useState(null);
   const fileInputRef = useRef(null);
 
   const message_size = 20;
@@ -66,22 +63,8 @@ function App() {
 
 
 
-  const togglehighlightNodes = () => {
-    // Should mark the nodes with a red outline and set the state to highlight
-    setHighlight(highlight => {
-      console.log(!highlight)
-      return !highlight
-    });
-    //const highlight_node = prompt('Enter task id:');
-    //setHighlightedNodes(prevNodes => ([...prevNodes, highlight_node]));
-  };
-
-
-
-
-
   const handleFileUpload = () => {
-    setHighlightedNodes([]);
+    setHighlightedNode(null);
     fileInputRef.current.click();
 
 
@@ -209,89 +192,83 @@ function App() {
       });
 
       if (!response.ok) {
+        setErrorMessage(`HTTP error! status: ${response.status}`);
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
 
-      setScheduleData(data);
+      setScheduleData(() => {
+        setErrorMessage('')
+        return data
+      });
       console.log("Response from backend:", data);
     } catch (error) {
+      setErrorMessage(`${error}`);
       console.error("Error sending data to backend:", error);
     }
-
   };
 
-
-
   return (
-    <div className="app-container">
-      <div className="sidebar">
-        <button className="button" onClick={addNode}>Add Node</button>
-        <button className="button" onClick={addEdge}>Add Edge</button>
-        <button className="button" onClick={downloadJsonFile}>Download JSON</button>
+    <>
+      <div className="app-container">
+        <div className="sidebar">
+          <button className="button" onClick={addNode}>Add Node</button>
+          <button className="button" onClick={addEdge}>Add Edge</button>
+          <button className="button" onClick={downloadJsonFile}>Download JSON</button>
 
 
-        <input type="file" accept=".json" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileChange} />
+          <input type="file" accept=".json" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileChange} />
 
-        <button className="button" onClick={handleFileUpload}>Upload JSON</button>
+          <button className="button" onClick={handleFileUpload}>Upload JSON</button>
 
-        <button className="button" onClick={() => scheduleGraph()}>Schedule Graph</button>
+          <button className="button" onClick={() => scheduleGraph()}>Schedule Graph</button>
 
+          <label className="checkbox-label">
+            <input type="checkbox" id="deleteMode" checked={deleteMode} onChange={() => {
+              setDeleteMode(prev => !prev);
+            }} />
+            <span>Delete Mode</span>
+          </label>
 
+        </div>
 
-        <label className="checkbox-label">
-          <input type="checkbox" id="highlightMode" checked={highlight} onChange={() => setHighlight(prev => { return !prev })} />
-          <span>Highlight Mode</span>
-        </label>
-
-
-        <label className="checkbox-label">
-          <input type="checkbox" id="deleteMode" checked={deleteMode} onChange={() => {
-            setDeleteMode(prev => !prev);
-          }} />
-          <span>Delete Mode</span>
-        </label>
-
-      </div>
-
-      <div className="main-content">
+        <div className="main-content">
 
 
-        <div className="svg-container">
-          <SVGComponent
-            graph={graph}
-            setGraph={setGraph}
-            deleteMode={deleteMode}
-            setSelectedNode={setSelectedNode}
-            setSelectedEdge={setSelectedEdge}
-            highlight={highlight}
-            setHighligtedNodes={setHighlightedNodes}
-            highlightNodes={highlightNodes}
-          />
-          <footer style={{ padding: '20px 0', marginTop: 'auto' }}>
-            <Container maxWidth="sm">
-              <Typography variant="body1" align="center">
-                <Link href="https://github.com/linem-davton/graphdraw-frontend" underline="hover" sx={{ padding: '20px' }} target="_blank" rel="noopener noreferrer">GitHub Frontend</Link>
-                <Link href="https://github.com/linem-davton/es-lab-task2" underline="hover" sx={{ padding: '20px' }} target="_blank" rel="noopener noreferrer">GitHub Backend</Link>
-                <Link href="https://eslab2docs.pages.dev/" underline="hover" sx={{ padding: '20px' }} target="_blank" rel="noopener noreferrer">Task Documentation </Link>
-              </Typography>
-            </Container>
-          </footer>
+          <div className="svg-container">
+            <SVGComponent
+              graph={graph}
+              setGraph={setGraph}
+              deleteMode={deleteMode}
+              highlightNode={highlightNode}
+              setHighlightedNode={setHighlightedNode}
+            />
+            <footer style={{ padding: '20px 0', marginTop: 'auto' }}>
+              <Container maxWidth="sm">
+                <Typography variant="body1" align="center">
+                  <Link href="https://github.com/linem-davton/graphdraw-frontend" underline="hover" sx={{ padding: '20px' }} target="_blank" rel="noopener noreferrer">GitHub Frontend</Link>
+                  <Link href="https://github.com/linem-davton/es-lab-task2" underline="hover" sx={{ padding: '20px' }} target="_blank" rel="noopener noreferrer">GitHub Backend</Link>
+                  <Link href="https://eslab2docs.pages.dev/" underline="hover" sx={{ padding: '20px' }} target="_blank" rel="noopener noreferrer">Task Documentation </Link>
+                </Typography>
+              </Container>
+            </footer>
+          </div>
+
+
+          <div className="schedule-data">
+            <ScheduleVisualization schedules={scheduleData} />
+
+          </div>
         </div>
 
 
-        <div className="schedule-data">
-          {/*<pre>{JSON.stringify(scheduleData, null, 2)}</pre>*/}
-          {/* Visualization of schedule data */}
-          <ScheduleVisualization schedules={scheduleData} />
-
-        </div> </div>
-
-
-
-
-    </div>
+      </div >
+      {errorMessage &&
+        <div className="error-message">
+          {errorMessage}
+        </div>}
+    </>
 
   );
 }
