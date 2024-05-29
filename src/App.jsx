@@ -120,10 +120,12 @@ function App() {
           const sender = message.sender.toString();
           const receiver = message.receiver.toString();
           const size = message.size;
+          const id=message.id;
+          const injection_time=message.injection_time;
           const senderNodeExists = newNodes.some((node) => node.id === sender);
           const receiverNodeExists = newNodes.some((node) => node.id === receiver);
           if (senderNodeExists && receiverNodeExists) {
-            newEdges.push({ sender: sender, receiver: receiver, size: size })
+            newEdges.push({ id: id,sender: sender, receiver: receiver, size: size, injection_time: injection_time })
           } else {
             alert('One or both nodes do not exist');
           }
