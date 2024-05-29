@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 
 import './App.css';
 import SVGComponent from './SVGComponent';
+import Sliders from './sliders';
 import ScheduleVisualization from './ScheduleVisualization';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
@@ -244,6 +245,7 @@ function App() {
               highlightNode={highlightNode}
               setHighlightedNode={setHighlightedNode}
             />
+            <Sliders />
             <footer style={{ padding: '20px 0', marginTop: 'auto' }}>
               <Container maxWidth="sm">
                 <Typography variant="body1" align="center">
