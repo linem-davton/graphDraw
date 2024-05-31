@@ -11,7 +11,7 @@
   --svg-border: #636e72;
   --svg-container: #353b48;
   --svg-circle-fill:#00b894;
-  --svg-circle-selected:red;
+  --svg-circle-selected:red; 
   --svg-cirlce-stroke: #dfe6e9;
   --svg-line-stroke: #dfe6e9;
 }
@@ -147,4 +147,20 @@ html, body {
   stroke: var(--svg-line-stroke); /* Stroke color */
   stroke-width: 1px; /* Stroke width */
 }
+.sliders {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 20px;
+}
 /* Add more styles as per your preference */
+.sliders span {
+  color: var(--text-color);
+  margin-right: 10px;
+}
+
+h1 {
+  color: var(--text-color);
+  margin-bottom: 20px;
+}

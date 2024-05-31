@@ -7,6 +7,28 @@ import ScheduleVisualization from './ScheduleVisualization';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import Link from '@mui/material/Link';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import Tooltip from '@mui/material/Tooltip';
+import examplejson from './example1.json';
+
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#00b894',
+    },
+    secondary: {
+      main: '#00b894',
+    },
+    background: {
+      default: '#2d3436',
+    },
+    text: {
+      primary: '#dfe6e9',
+    }
+  },
+
+});
 
 function App() {
   const [graph, setGraph] = useState({ nodes: [], edges: [] });
@@ -20,25 +42,28 @@ function App() {
 
   const message_size = 20;
 
+  // Message injection time is the time at which the message is injected into the network, 0 denotes absence of any delay
+  const message_injection_time = 0;
+
 
   const addNode = () => {
-    const nodeName = graph.nodes.length;
+    const nodeId = graph.nodes.length;
 
-    const wcet_fullspeed = parseInt(prompt('Enter WCET (in milliseconds) for the new node:'));
+    const wcet = parseInt(prompt('Enter WCET (in milliseconds) for the new node:'));
     const mcet = parseInt(prompt('Enter MCET (in milliseconds) for the new node:'));
     const deadline = parseInt(prompt('Enter deadline (in milliseconds) for the new node:'));
 
-    if (wcet_fullspeed !== null && mcet !== null && deadline !== null) {
-
+    if (!isNaN(wcet) && !isNaN(mcet) && !isNaN(deadline)) {
       setGraph(prevGraph => ({
         ...prevGraph,
-        nodes: [...prevGraph.nodes, { id: nodeName.toString(), wcet: wcet_fullspeed, mcet: mcet, deadline: deadline }]
+        nodes: [...prevGraph.nodes, { id: nodeId.toString(), wcet: wcet, mcet: mcet, deadline: deadline }]
       }));
 
     }
   };
 
   const addEdge = () => {
+    const msgId = graph.edges.length;
     const sender = prompt('Enter sender node:');
     const receiver = prompt('Enter receiver node:');
     const sourceNodeExists = graph.nodes.some(node => node.id === sender)
@@ -46,9 +71,9 @@ function App() {
 
     if (sourceNodeExists && targetNodeExists) {
       const size = message_size;
-      const edge = { sender: sender, receiver: receiver, size: size }
+      const edge = { id: msgId.toString(), sender: sender, receiver: receiver, size: size, message_injection_time: message_injection_time }
 
-      if (size !== null) {
+      if (!isNaN(size)) {
         setGraph(prevGraph => ({
           ...prevGraph,
           edges: [...prevGraph.edges, edge]
@@ -120,12 +145,12 @@ function App() {
           const sender = message.sender.toString();
           const receiver = message.receiver.toString();
           const size = message.size;
-          const id=message.id;
-          const injection_time=message.injection_time;
+          const id = message.id;
+          const injection_time = message.injection_time;
           const senderNodeExists = newNodes.some((node) => node.id === sender);
           const receiverNodeExists = newNodes.some((node) => node.id === receiver);
           if (senderNodeExists && receiverNodeExists) {
-            newEdges.push({ id: id,sender: sender, receiver: receiver, size: size, injection_time: injection_time })
+            newEdges.push({ id: id, sender: sender, receiver: receiver, size: size, injection_time: injection_time })
           } else {
             alert('One or both nodes do not exist');
           }
@@ -145,6 +170,10 @@ function App() {
 
   const downloadJsonFile = () => {
     // Combine the existing jsonData with the new nodes and edges
+    if (!jsonData) {
+      setErrorMessage('No JSON data to download');
+      return;
+    }
     const combinedJsonData = {
       application: { jobs: graph.nodes, messages: graph.edges }, // Existing JSON data
       platfrom: jsonData["platform"]
@@ -175,10 +204,14 @@ function App() {
     document.body.removeChild(link);
   };
 
+  const loadDefaultJSON = () => {
+    setJsonData(examplejson);
+  };
+
 
   const scheduleGraph = async () => {
     if (graph.nodes.length === 0) {
-      alert('No jobs to schedule');
+      setErrorMessage('No jobs to schedule');
       return;
     }
     const request = { application: { jobs: graph.nodes, messages: graph.edges }, platform: jsonData.platform };
@@ -213,26 +246,34 @@ function App() {
   };
 
   return (
-    <>
+    <ThemeProvider theme={theme}>
       <div className="app-container">
         <div className="sidebar">
-          <button className="button" onClick={addNode}>Add Node</button>
-          <button className="button" onClick={addEdge}>Add Edge</button>
-          <button className="button" onClick={downloadJsonFile}>Download JSON</button>
+          <h1>Schedule Visualization</h1>
+          {jsonData && <>
+            <button className="button" onClick={addNode}>Add Node</button>
+            <button className="button" onClick={addEdge}>Add Edge</button>
 
+            <Tooltip title="Enable this mode to delete nodes and edges by clicking on them.">
+              <label className="checkbox-label">
+                <input type="checkbox" id="deleteMode" checked={deleteMode} onChange={() => {
+                  setDeleteMode(prev => !prev);
+                }} />
+                <span>Delete Mode</span>
+              </label>
+            </Tooltip>
+
+            <button className="button" onClick={() => scheduleGraph()}>Schedule Graph</button>
+
+
+            <button className="button" onClick={downloadJsonFile}>Download JSON</button>
+          </>
+          }
 
           <input type="file" accept=".json" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileChange} />
 
           <button className="button" onClick={handleFileUpload}>Upload JSON</button>
-
-          <button className="button" onClick={() => scheduleGraph()}>Schedule Graph</button>
-
-          <label className="checkbox-label">
-            <input type="checkbox" id="deleteMode" checked={deleteMode} onChange={() => {
-              setDeleteMode(prev => !prev);
-            }} />
-            <span>Delete Mode</span>
-          </label>
+          <button className="button" onClick={loadDefaultJSON}>Load Default JSON</button>
 
         </div>
 
@@ -247,7 +288,8 @@ function App() {
               highlightNode={highlightNode}
               setHighlightedNode={setHighlightedNode}
             />
-            <Sliders />
+
+            {highlightNode !== null && <Sliders />}
             <footer style={{ padding: '20px 0', marginTop: 'auto' }}>
               <Container maxWidth="sm">
                 <Typography variant="body1" align="center">
@@ -272,7 +314,7 @@ function App() {
         <div className="error-message">
           {errorMessage}
         </div>}
-    </>
+    </ThemeProvider>
 
   );
 }

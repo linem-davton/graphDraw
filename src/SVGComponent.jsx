@@ -15,7 +15,7 @@ const SVGComponent = ({ graph, setGraph, deleteMode, highlightNode, setHighlight
     } else {
       setHighlightedNode(node => {
         if (node === nodeId) {
-          return [];
+          return null;
         }
         return nodeId;
       });

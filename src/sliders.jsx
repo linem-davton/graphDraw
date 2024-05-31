@@ -27,19 +27,17 @@ function Sliders() {
   }
   return (
     <div className='sliders'>
-      <Box sx={{
-        width: 700
-      }}>
+      <Box sx={{ width: '100%' }}>
 
         <Stack spacing={2} direction="row" sx={{ mb: 1 }} alignItems="center">
           <span>WCET:{wcet}</span>
-          <Slider value={wcet} min={1} max={100} step={1} color="#00b894"
+          <Slider value={wcet} min={1} max={100} step={1} color="primary"
             onChange={(_event, newValue) => handleSliderChange('wcet', newValue)} />
-          <span>100</span>
+          <span sx={{ color: 'text.primary' }}>100</span>
         </Stack>
         <Stack spacing={2} direction="row" sx={{ mb: 1 }} alignItems="center">
           <span>Deadline:{deadline}</span>
-          <Slider value={deadline} min={1} max={100} step={1} color="#09856a"
+          <Slider value={deadline} min={1} max={100} step={1} color="primary"
             onChange={(_event, newValue) => handleSliderChange('deadline', newValue)} />
           <span>100</span>
         </Stack>
