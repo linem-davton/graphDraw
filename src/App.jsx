@@ -86,9 +86,6 @@ function App() {
     }
   };
 
-
-
-
   const handleFileUpload = () => {
     setHighlightedNode(null);
     fileInputRef.current.click();
@@ -99,12 +96,9 @@ function App() {
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     if (!file) return;
-
-
     readFileContents(file);
 
   };
-
 
   const readFileContents = (file) => {
     const reader = new FileReader();
@@ -119,9 +113,7 @@ function App() {
         console.error('Error parsing JSON:', error);
       }
     };
-
     reader.readAsText(file);
-
 
   };
 
@@ -161,8 +153,6 @@ function App() {
       //console.log(jsonData)
     }
   };
-
-
 
   useEffect(() => {
     createGraph();
@@ -250,36 +240,49 @@ function App() {
       <div className="app-container">
         <div className="sidebar">
           <h1>Schedule Visualization</h1>
-          {jsonData && <>
-            <button className="button" onClick={addNode}>Add Node</button>
-            <button className="button" onClick={addEdge}>Add Edge</button>
 
-            <Tooltip title="Enable this mode to delete nodes and edges by clicking on them.">
-              <label className="checkbox-label">
-                <input type="checkbox" id="deleteMode" checked={deleteMode} onChange={() => {
-                  setDeleteMode(prev => !prev);
-                }} />
-                <span>Delete Mode</span>
-              </label>
-            </Tooltip>
+          {jsonData &&
+            <>
+              <button className="button" onClick={addNode}>Add Node</button>
+              <button className="button" onClick={addEdge}>Add Edge</button>
 
-            <button className="button" onClick={() => scheduleGraph()}>Schedule Graph</button>
-
-
-            <button className="button" onClick={downloadJsonFile}>Download JSON</button>
-          </>
+              <Tooltip title="Enable this mode to delete nodes and edges by clicking on them.">
+                <label className="checkbox-label">
+                  <input type="checkbox" id="deleteMode" checked={deleteMode} onChange={() => {
+                    setDeleteMode(prev => !prev);
+                  }} />
+                  <span>Delete Mode</span>
+                </label>
+              </Tooltip>
+              <button className="button" onClick={() => scheduleGraph()}>Schedule Graph</button>
+              <button className="button" onClick={downloadJsonFile}>Download JSON</button>
+            </>
           }
-
           <input type="file" accept=".json" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileChange} />
-
           <button className="button" onClick={handleFileUpload}>Upload JSON</button>
           <button className="button" onClick={loadDefaultJSON}>Load Default JSON</button>
-
+          <footer style={{ padding: '20px 0', marginTop: 'auto' }}>
+            <Container maxWidth="sm">
+              <Typography variant="body1" align="center">
+                <Link href="https://github.com/linem-davton/graphdraw-frontend" underline="hover" target="_blank" rel="noopener noreferrer">
+                  GitHub Frontend
+                </Link>
+              </Typography>
+              <Typography variant="body1" align="center">
+                <Link href="https://github.com/linem-davton/es-lab-task2" underline="hover" target="_blank" rel="noopener noreferrer">
+                  GitHub Backend
+                </Link>
+              </Typography>
+              <Typography variant="body1" align="center">
+                <Link href="https://eslab2docs.pages.dev/" underline="hover" target="_blank" rel="noopener noreferrer">
+                  Task Documentation
+                </Link>
+              </Typography>
+            </Container>
+          </footer>
         </div>
 
         <div className="main-content">
-
-
           <div className="svg-container">
             <SVGComponent
               graph={graph}
@@ -290,15 +293,7 @@ function App() {
             />
 
             {highlightNode !== null && <Sliders highlightNode={highlightNode} graph={graph} setGraph={setGraph} />}
-            <footer style={{ padding: '20px 0', marginTop: 'auto' }}>
-              <Container maxWidth="sm">
-                <Typography variant="body1" align="center">
-                  <Link href="https://github.com/linem-davton/graphdraw-frontend" underline="hover" sx={{ padding: '20px' }} target="_blank" rel="noopener noreferrer">GitHub Frontend</Link>
-                  <Link href="https://github.com/linem-davton/es-lab-task2" underline="hover" sx={{ padding: '20px' }} target="_blank" rel="noopener noreferrer">GitHub Backend</Link>
-                  <Link href="https://eslab2docs.pages.dev/" underline="hover" sx={{ padding: '20px' }} target="_blank" rel="noopener noreferrer">Task Documentation </Link>
-                </Typography>
-              </Container>
-            </footer>
+
           </div>
 
 
@@ -308,12 +303,12 @@ function App() {
           </div>
         </div>
 
-
       </div >
       {errorMessage &&
         <div className="error-message">
           {errorMessage}
         </div>}
+
     </ThemeProvider>
 
   );
