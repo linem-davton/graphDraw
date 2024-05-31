@@ -107,6 +107,7 @@ html, body {
   justify-content: flex-start;
 }
 .schedule-data {
+  margin: 30px;
   display: flex;
   flex-direction: column;
   width: 50%;

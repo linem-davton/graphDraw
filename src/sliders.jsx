@@ -6,10 +6,16 @@ import Button from '@mui/material/Button';
 
 import { useState } from 'react';
 
-function Sliders() {
+function Sliders({ highlightNode, graph, setGraph }) {
+  console.log('highlightNode', highlightNode);
+  console.log('graph', graph);
 
-  const [wcet, setWcet] = useState(10);
-  const [deadline, setDeadline] = useState(10);
+  if (!graph || !graph.nodes) {
+    <div></div>
+  }
+
+  const highlightedNode = graph.nodes.find(node => node.id === highlightNode)
+  console.log('highlightNode', highlightNode);
 
   const resetSlider = () => {
     setWcet(10);
@@ -19,30 +25,38 @@ function Sliders() {
 
   const handleSliderChange = (slider, newValue) => {
     console.log(slider, newValue);
-    if (slider === 'wcet') {
-      setWcet(newValue);
-    } else {
-      setDeadline(newValue);
-    }
+    // Update the graph state immutably
+    setGraph(prevGraph => {
+      // Map over nodes to find the node to update
+      const updatedNodes = prevGraph.nodes.map(node => {
+        // Check if the current node is the one to update
+        if (node.id === highlightNode) {
+          // Update the specific property (wcet or deadline) based on the slider
+          return { ...node, [slider]: newValue };
+        }
+        return node; // Return other nodes unmodified
+      });
+
+      // Return a new graph object with the updated nodes array
+      return { ...prevGraph, nodes: updatedNodes };
+    });
   }
   return (
     <div className='sliders'>
       <Box sx={{ width: '100%' }}>
-
         <Stack spacing={2} direction="row" sx={{ mb: 1 }} alignItems="center">
-          <span>WCET:{wcet}</span>
-          <Slider value={wcet} min={1} max={100} step={1} color="primary"
+          <span>WCET:{highlightedNode.wcet}</span>
+          <Slider value={highlightedNode.wcet} min={1} max={100} step={1} color="primary"
             onChange={(_event, newValue) => handleSliderChange('wcet', newValue)} />
           <span sx={{ color: 'text.primary' }}>100</span>
         </Stack>
         <Stack spacing={2} direction="row" sx={{ mb: 1 }} alignItems="center">
-          <span>Deadline:{deadline}</span>
-          <Slider value={deadline} min={1} max={100} step={1} color="primary"
+          <span>Deadline:{highlightedNode.deadline}</span>
+          <Slider value={highlightedNode.deadline} min={1} max={1000} step={1} color="primary"
             onChange={(_event, newValue) => handleSliderChange('deadline', newValue)} />
-          <span>100</span>
+          <span>1000</span>
         </Stack>
       </Box>
-      <Button variant="contained" sx={{ margin: '30px' }} onClick={resetSlider}>Reset</Button>
     </div >
   );
 }

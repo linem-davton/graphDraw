@@ -289,7 +289,7 @@ function App() {
               setHighlightedNode={setHighlightedNode}
             />
 
-            {highlightNode !== null && <Sliders />}
+            {highlightNode !== null && <Sliders highlightNode={highlightNode} graph={graph} setGraph={setGraph} />}
             <footer style={{ padding: '20px 0', marginTop: 'auto' }}>
               <Container maxWidth="sm">
                 <Typography variant="body1" align="center">
