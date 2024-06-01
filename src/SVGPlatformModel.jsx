@@ -120,18 +120,12 @@ const SVGPlatformModel = ({ graph, setGraph, deleteMode, highlightNode, setHighl
       if (d.shape === 'compute') {
         node.append('circle')
           .attr('r', nodeRadius)
-          .classed("highlighted-circle", d => {
-            return highlightNode === d.label;
-          });
       } else if (d.shape === 'router') {
         node.append('rect')
           .attr('width', nodeRadius * 2)
           .attr('height', nodeRadius * 2)
           .attr('x', -nodeRadius)
           .attr('y', -nodeRadius)
-          .classed("highlighted-rect", d => {
-            return highlightNode === d.label;
-          });
       }
     });
 
@@ -156,17 +150,23 @@ const SVGPlatformModel = ({ graph, setGraph, deleteMode, highlightNode, setHighl
       })
       .on("click", function(event, edge) {
         if (deleteMode) {
+          if (edge.v === highlightedEdge?.sender && edge.w === highlightedEdge?.receiver) {
+            console.log("from edge click, edge clicked", edge)
+            console.log("from edge click, highlightedEdge", highlightedEdge)
+            setHighlightedEdge(null);
+          }
           setGraph(prevGraph => {
             const newEdges = prevGraph.edges.filter(e => !(e.sender === edge.v && e.receiver === edge.w));
             return { nodes: prevGraph.nodes, edges: newEdges };
           });
+        } else {
+          setHighlightedEdge(prev => {
+            if (prev?.sender === edge.v && prev?.receiver === edge.w)
+              return null;
+            else
+              return { sender: edge.v, receiver: edge.w };
+          })
         }
-        setHighlightedEdge(prev => {
-          if (prev?.sender === edge.v && prev?.receiver === edge.w)
-            return null;
-          else
-            return { sender: edge.v, receiver: edge.w };
-        })
       });
 
   }, [graph, deleteMode, highlightNode, highlightedEdge]);

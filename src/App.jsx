@@ -260,8 +260,8 @@ function App() {
           {jsonData &&
             <>
               <button className="button" onClick={() => scheduleGraph()}>Schedule Graph</button>
-              <button className="button" onClick={addNode}>Add Node</button>
-              <button className="button" onClick={addEdge}>Add Edge</button>
+              <button className="button" onClick={addNode}>Add Task</button>
+              <button className="button" onClick={addEdge}>Add Task Dependency</button>
 
               <Tooltip title="Enable this mode to delete nodes and edges by clicking on them.">
                 <label className="checkbox-label">
@@ -322,7 +322,7 @@ function App() {
               highlightedEdge={highlightedEdgePM}
               setHighlightedEdge={setHighlightedEdgePM}
             />
-            {highlightedEdgePM !== null && <SlidersPM highlightedEdge={highlightedEdgePM} graph={platformModel} setGraph={setPlatformModel} />}
+            {highlightedEdgePM && <SlidersPM highlightedEdge={highlightedEdgePM} graph={platformModel} setGraph={setPlatformModel} />}
           </div>
 
           {scheduleData &&

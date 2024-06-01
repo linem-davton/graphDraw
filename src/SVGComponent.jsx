@@ -11,6 +11,9 @@ const SVGComponent = ({ graph, setGraph, deleteMode, highlightNode, setHighlight
     if (deleteMode) {
       const newNodes = graph.nodes.filter(node => node.id !== nodeId);
       const newEdges = graph.edges.filter(edge => edge.sender !== nodeId && edge.receiver !== nodeId);
+      if (nodeId === highlightNode) {
+        setHighlightedNode(null)
+      }
       setGraph({ nodes: newNodes, edges: newEdges });
     } else {
       setHighlightedNode(node => {
@@ -102,9 +105,6 @@ const SVGComponent = ({ graph, setGraph, deleteMode, highlightNode, setHighlight
       .attr('x2', d => calculateBoundaryPoint(g.node(d.w), g.node(d.v)).x)
       .attr('y2', d => calculateBoundaryPoint(g.node(d.w), g.node(d.v)).y)
       .attr('marker-end', 'url(#arrowhead)')
-      .classed("highlighted-edge", d => {
-        return (d.v === highlightedEdge?.sender && d.w === highlightedEdge?.receiver);
-      })
       .on("click", function(event, edge) {
         if (deleteMode) {
           setGraph(prevGraph => {

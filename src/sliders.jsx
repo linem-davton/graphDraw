@@ -2,16 +2,11 @@
 import Slider from '@mui/material/Slider';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
-import Button from '@mui/material/Button';
 
-import { useState } from 'react';
 
 function Sliders({ highlightNode, graph, setGraph }) {
-  console.log('highlightNode', highlightNode);
-  console.log('graph', graph);
-
   if (!graph || !graph.nodes) {
-    <div></div>
+    return (<div></div>);
   }
 
   const highlightedNode = graph.nodes.find(node => node.id === highlightNode)

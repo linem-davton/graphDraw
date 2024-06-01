@@ -5,9 +5,10 @@ import Stack from '@mui/material/Stack';
 
 function SlidersPM({ highlightedEdge, graph, setGraph }) {
   if (!graph || !graph.edges) {
-    <div></div>
+    return <div></div>;
   }
   const edge = graph.edges.find(edge => edge.sender === highlightedEdge.sender && edge.receiver === highlightedEdge.receiver)
+
   const handleSliderChange = (slider, newValue) => {
     // Update the graph state immutably
     setGraph(prevGraph => {
