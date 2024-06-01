@@ -67,6 +67,7 @@ html, body {
   .sidebar{
     width:100%;
     flex-direction:row;
+    overflow-x: auto;
   }
   .svg-container{
     width:100%;

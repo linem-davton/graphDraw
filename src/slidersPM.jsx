@@ -8,9 +8,10 @@ function SlidersPM({ highlightedEdge, graph, setGraph }) {
     return <div></div>;
   }
   const edge = graph.links.find(edge => edge.start_node == highlightedEdge.start_node && edge.end_node == highlightedEdge.end_node)
-  console.log(edge);
-  console.log(highlightedEdge);
+  console.log("selected edge", edge);
+  console.log("highlighted", highlightedEdge);
   console.log(graph);
+
   const handleSliderChange = (slider, newValue) => {
     // Update the graph state immutably
     setGraph(prevGraph => {
@@ -19,13 +20,14 @@ function SlidersPM({ highlightedEdge, graph, setGraph }) {
         // Check if the current edge is the one to update
         if (edge_.id === edge.id) {
           // Update the specific property based on the slider
+          console.log("updated Edge", { ...edge_, [slider]: newValue });
           return { ...edge_, [slider]: newValue };
         }
         return edge_; // Return other edges unmodified
       });
 
       // Return a new graph object with the updated nodes array
-      return { ...prevGraph, edges: updatedEdges };
+      return { ...prevGraph, links: updatedEdges };
     });
   }
   return (

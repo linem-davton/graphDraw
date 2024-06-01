@@ -32,6 +32,15 @@ const theme = createTheme({
 
 });
 
+const saveToLocalStorage = (key, data) => {
+  localStorage.setItem(key, JSON.stringify(data));
+};
+
+const loadFromLocalStorage = (key) => {
+  const data = localStorage.getItem(key);
+  return data ? JSON.parse(data) : null;
+};
+
 function App() {
   const [graph, setGraph] = useState({ nodes: [], edges: [] });
   const [platformModel, setPlatformModel] = useState(null)
@@ -45,8 +54,31 @@ function App() {
   const [highlightNodePM, setHighlightedNodePM] = useState(null);
   const [highlightedEdgePM, setHighlightedEdgePM] = useState(null);
   const fileInputRef = useRef(null);
-
+  const [savedData, setSavedData] = useState(null);
   const message_size = 20;
+
+  useEffect(() => {
+    const data = loadFromLocalStorage('model');
+    if (data) {
+      setSavedData(data);
+    }
+  }, []);
+
+  const handleSave = () => {
+    const dataToSave = {
+      application: { tasks: graph.nodes, messages: graph.edges },
+      platform: platformModel
+    };
+    saveToLocalStorage('model', dataToSave);
+    setSavedData(dataToSave);
+  };
+
+  const handleSavedLoad = () => {
+    if (savedData) {
+      setJsonData(savedData);
+    }
+  };
+
 
   // Message injection time is the time at which the message is injected into the network, 0 denotes absence of any delay
   const message_injection_time = 0;
@@ -244,7 +276,7 @@ function App() {
     <ThemeProvider theme={theme}>
       <div className="app-container">
         <div className="sidebar">
-          <h1>Schedule Visualization</h1>
+          <h1>Distributed Scheduling</h1>
 
           {jsonData &&
             <>
@@ -266,6 +298,8 @@ function App() {
           <input type="file" accept=".json" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileChange} />
           <button className="button" onClick={handleFileUpload}>Upload JSON</button>
           <button className="button" onClick={loadDefaultJSON}>Load Default JSON</button>
+          {jsonData && <button className="button" onClick={handleSave}>Save Locally</button>}
+          {savedData && <button className="button" onClick={handleSavedLoad}>Load Last Saved</button>}
           <footer style={{ padding: '20px 0', marginTop: 'auto' }}>
             <Container maxWidth="sm">
               <Typography variant="body1" align="center">
