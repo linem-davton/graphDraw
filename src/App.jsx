@@ -56,6 +56,7 @@ function App() {
   const fileInputRef = useRef(null);
   const [savedData, setSavedData] = useState(null);
   const message_size = 20;
+  const message_injection_time = 0;
 
   useEffect(() => {
     const data = loadFromLocalStorage('model');
@@ -78,11 +79,6 @@ function App() {
       setJsonData(savedData);
     }
   };
-
-
-  // Message injection time is the time at which the message is injected into the network, 0 denotes absence of any delay
-  const message_injection_time = 0;
-
 
   const addNode = () => {
     const nodeId = graph.nodes.length;
@@ -127,8 +123,6 @@ function App() {
   const handleFileUpload = () => {
     setHighlightedNode(null);
     fileInputRef.current.click();
-
-
   };
 
   const handleFileChange = (event) => {
@@ -191,6 +185,11 @@ function App() {
   useEffect(() => {
     createGraph();
   }, [jsonData])
+
+  useEffect(() => {
+    scheduleGraph();
+
+  }, [graph, platformModel])
 
   const downloadJsonFile = () => {
     // Combine the existing jsonData with the new nodes and edges
@@ -280,7 +279,6 @@ function App() {
 
           {jsonData &&
             <>
-              <button className="button" onClick={() => scheduleGraph()}>Schedule Graph</button>
               <button className="button" onClick={addNode}>Add Task</button>
               <button className="button" onClick={addEdge}>Add Task Dependency</button>
 
