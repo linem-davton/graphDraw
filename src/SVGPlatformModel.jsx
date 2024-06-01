@@ -10,8 +10,8 @@ const SVGPlatformModel = ({ graph, setGraph, deleteMode, highlightNode, setHighl
   const handleNodeClick = (nodeId) => {
     if (deleteMode) {
       const newNodes = graph.nodes.filter(node => node.id !== nodeId);
-      const newEdges = graph.edges.filter(edge => edge.sender !== nodeId && edge.receiver !== nodeId);
-      setGraph({ nodes: newNodes, edges: newEdges });
+      const newEdges = graph.links.filter(edge => edge.start_node !== nodeId && edge.end_node !== nodeId);
+      setGraph({ nodes: newNodes, links: newEdges });
     } else {
       setHighlightedNode(node => {
         if (node === nodeId) {
@@ -95,8 +95,8 @@ const SVGPlatformModel = ({ graph, setGraph, deleteMode, highlightNode, setHighl
     });
 
     // Add edges to the graph
-    graph.edges.forEach(edge => {
-      g.setEdge(edge.sender, edge.receiver, {
+    graph.links.forEach(edge => {
+      g.setEdge(edge.start_node, edge.end_node, {
         width: 10, height: 10, label: edge.label, curve: d3.curveBasis
       });
     });
@@ -146,25 +146,24 @@ const SVGPlatformModel = ({ graph, setGraph, deleteMode, highlightNode, setHighl
       .attr('x2', d => calculateBoundaryPoint(g.node(d.w), g.node(d.v)).x)
       .attr('y2', d => calculateBoundaryPoint(g.node(d.w), g.node(d.v)).y)
       .classed("highlighted-edge", d => {
-        return (d.v === highlightedEdge?.sender && d.w === highlightedEdge?.receiver);
+        return (d.v === highlightedEdge?.start_node && d.w === highlightedEdge?.end_node);
       })
       .on("click", function(event, edge) {
         if (deleteMode) {
-          if (edge.v === highlightedEdge?.sender && edge.w === highlightedEdge?.receiver) {
-            console.log("from edge click, edge clicked", edge)
-            console.log("from edge click, highlightedEdge", highlightedEdge)
+          if (edge.v == highlightedEdge?.start_node && edge.w == highlightedEdge?.end_node) {
             setHighlightedEdge(null);
           }
           setGraph(prevGraph => {
-            const newEdges = prevGraph.edges.filter(e => !(e.sender === edge.v && e.receiver === edge.w));
-            return { nodes: prevGraph.nodes, edges: newEdges };
+            console.log(edge)
+            const newEdges = prevGraph.links.filter(e => !(e.start_node == edge.v && e.end_node == edge.w));
+            return { nodes: prevGraph.nodes, links: newEdges };
           });
         } else {
           setHighlightedEdge(prev => {
-            if (prev?.sender === edge.v && prev?.receiver === edge.w)
+            if (prev?.start_node == edge.v && prev?.end_node == edge.w)
               return null;
             else
-              return { sender: edge.v, receiver: edge.w };
+              return { start_node: edge.v, end_node: edge.w };
           })
         }
       });

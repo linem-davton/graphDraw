@@ -34,7 +34,7 @@ const theme = createTheme({
 
 function App() {
   const [graph, setGraph] = useState({ nodes: [], edges: [] });
-  const [platformModel, setPlatformModel] = useState({ nodes: [], edges: [] })
+  const [platformModel, setPlatformModel] = useState(null)
   const [deleteMode, setDeleteMode] = useState(false);
   const [jsonData, setJsonData] = useState(null);
   const [scheduleData, setScheduleData] = useState(null);
@@ -153,20 +153,7 @@ function App() {
       }
       setGraph({ nodes: newNodes, edges: newEdges });
     }
-    {
-      const newNodes = [];
-      const newEdges = [];
-
-      jsonData?.platform?.nodes?.forEach(node => {
-        newNodes.push({ id: node.id.toString(), type: node.type })
-      });
-      jsonData?.platform?.links?.forEach(link => {
-        newEdges.push({ id: link.id.toString(), sender: link.start_node.toString(), receiver: link.end_node.toString(), bandwidth: link.bandwidth, delay: link.link_delay })
-
-      });
-      setPlatformModel({ nodes: newNodes, edges: newEdges });
-    }
-
+    setPlatformModel(jsonData?.platform);
   };
 
   useEffect(() => {
@@ -180,8 +167,8 @@ function App() {
       return;
     }
     const combinedJsonData = {
-      application: { jobs: graph.nodes, messages: graph.edges }, // Existing JSON data
-      platfrom: jsonData["platform"]
+      application: { tasks: graph.nodes, messages: graph.edges },
+      platform: platformModel
       // Add any new properties if necessary
     };
 
@@ -220,7 +207,9 @@ function App() {
       setErrorMessage('No jobs to schedule');
       return;
     }
-    const request = { application: { tasks: graph.nodes, messages: graph.edges }, platform: jsonData.platform };
+    const request = {
+      application: { tasks: graph.nodes, messages: graph.edges }, platform: platformModel
+    };
 
     try {
       const response = await fetch('http://localhost:8000/schedule_jobs', {
