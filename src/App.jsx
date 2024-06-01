@@ -291,11 +291,10 @@ function App() {
 
           </div>
 
-
-          <div className="schedule-data">
-            <ScheduleVisualization schedules={scheduleData} />
-
-          </div>
+          {scheduleData &&
+            <div className="schedule-data">
+              <ScheduleVisualization schedules={scheduleData} />
+            </div>}
         </div>
 
       </div >
