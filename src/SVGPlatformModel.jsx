@@ -3,7 +3,7 @@ import * as d3 from 'd3';
 import dagre from 'dagre';
 
 
-const SVGComponent = ({ graph, setGraph, deleteMode, highlightNode, setHighlightedNode, highlightedEdge, setHighlightedEdge }) => {
+const SVGPlatformModel = ({ graph, setGraph, deleteMode, highlightNode, setHighlightedNode, highlightedEdge, setHighlightedEdge }) => {
   const svgRef = useRef();
   const nodeRadius = 5;
 
@@ -22,15 +22,46 @@ const SVGComponent = ({ graph, setGraph, deleteMode, highlightNode, setHighlight
 
     }
   };
+
   const calculateBoundaryPoint = (source, target) => {
     const deltaX = target.x - source.x;
     const deltaY = target.y - source.y;
     const dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-    return {
-      x: source.x + (nodeRadius * deltaX / dist),
-      y: source.y + (nodeRadius * deltaY / dist)
-    };
+
+    // Adjust the boundary point calculation based on the node type
+    if (source.type === 'router' || target.type === 'router') {
+      // Handle square (router) geometry
+      const angle = Math.atan2(deltaY, deltaX);
+      const halfDiagonal = Math.sqrt(2 * (nodeRadius ** 2)); // Diagonal of a square for a router
+      const edgeDist = nodeRadius / Math.cos(Math.PI / 4 - Math.abs(angle % (Math.PI / 2) - Math.PI / 4));
+
+      return {
+        x: source.x + (edgeDist * Math.cos(angle)),
+        y: source.y + (edgeDist * Math.sin(angle))
+      };
+    } else if (source.type === 'router' || target.type === 'router') {
+      // At least one node is a square
+      let rectSideLength = nodeRadius * 2; // Assuming square side length is twice the radius used for circles
+      let aspectRatio = Math.abs(deltaX / deltaY);
+      let halfWidth = rectSideLength / 2;
+
+      if (aspectRatio > 1) {
+        // Intersection is at the left or right side of the square
+        return {
+          x: source.x + (Math.sign(deltaX) * halfWidth),
+          y: source.y + (Math.sign(deltaX) * halfWidth / aspectRatio)
+        };
+      }
+    }
+    else {
+      // Handle circle (compute) geometry
+      return {
+        x: source.x + (nodeRadius * deltaX / dist),
+        y: source.y + (nodeRadius * deltaY / dist)
+      };
+    }
   };
+
 
   useEffect(() => {
     const svg = d3.select(svgRef.current);
@@ -53,7 +84,14 @@ const SVGComponent = ({ graph, setGraph, deleteMode, highlightNode, setHighlight
 
     // Add nodes to the graph
     graph.nodes.forEach(node => {
-      g.setNode(node.id, { label: node.id, width: 10, height: 10 });
+      const width = node.type === 'router' ? 20 : 10; // Adjust width for routers to be larger
+      const height = node.type === 'router' ? 20 : 10; // Adjust height for routers
+      g.setNode(node.id, {
+        label: node.id,
+        width: width,
+        height: height,
+        shape: node.type  // Store the node type for later use
+      });
     });
 
     // Add edges to the graph
@@ -74,16 +112,28 @@ const SVGComponent = ({ graph, setGraph, deleteMode, highlightNode, setHighlight
       .append('g')
       .attr('class', 'node')
       .attr('transform', d => `translate(${d.x},${d.y})`)
-
       .on('click', function(event, d) {
-        handleNodeClick(d.label); // Function to handle node deletion
+        handleNodeClick(d.label);
       });
-
-    nodes.append('circle')
-      .attr('r', nodeRadius)
-      .classed("highlighted-circle", d => {
-        return highlightNode === d.label;
-      });
+    nodes.each(function(d) {
+      const node = d3.select(this);
+      if (d.shape === 'compute') {
+        node.append('circle')
+          .attr('r', nodeRadius)
+          .classed("highlighted-circle", d => {
+            return highlightNode === d.label;
+          });
+      } else if (d.shape === 'router') {
+        node.append('rect')
+          .attr('width', nodeRadius * 2)
+          .attr('height', nodeRadius * 2)
+          .attr('x', -nodeRadius)
+          .attr('y', -nodeRadius)
+          .classed("highlighted-rect", d => {
+            return highlightNode === d.label;
+          });
+      }
+    });
 
     nodes.append('text')
       .attr('text-anchor', 'middle')
@@ -101,7 +151,6 @@ const SVGComponent = ({ graph, setGraph, deleteMode, highlightNode, setHighlight
       .attr('y1', d => calculateBoundaryPoint(g.node(d.v), g.node(d.w)).y)
       .attr('x2', d => calculateBoundaryPoint(g.node(d.w), g.node(d.v)).x)
       .attr('y2', d => calculateBoundaryPoint(g.node(d.w), g.node(d.v)).y)
-      .attr('marker-end', 'url(#arrowhead)')
       .classed("highlighted-edge", d => {
         return (d.v === highlightedEdge?.sender && d.w === highlightedEdge?.receiver);
       })
@@ -120,20 +169,6 @@ const SVGComponent = ({ graph, setGraph, deleteMode, highlightNode, setHighlight
         })
       });
 
-    svg.append('defs').append('marker')
-      .attr('id', 'arrowhead')
-      .attr('viewBox', '-0 -5 10 10')
-      .attr('refX', 5)
-      .attr('refY', 0)
-      .attr('orient', 'auto')
-      .attr('markerWidth', 6)
-      .attr('markerHeight', 6)
-      .attr('xoverflow', 'visible')
-      .append('svg:path')
-      .attr('d', 'M 0,-5 L 10 ,0 L 0,5')
-      .attr('fill', '#999')
-      .style('stroke', 'none');
-
   }, [graph, deleteMode, highlightNode, highlightedEdge]);
 
   return (
@@ -143,4 +178,4 @@ const SVGComponent = ({ graph, setGraph, deleteMode, highlightNode, setHighlight
   );
 };
 
-export default SVGComponent;
+export default SVGPlatformModel;

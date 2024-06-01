@@ -14,6 +14,7 @@
   --svg-circle-selected:red; 
   --svg-cirlce-stroke: #dfe6e9;
   --svg-line-stroke: #dfe6e9;
+  --svg-rectangle-fill: #e67e22; /* Warm orange */
 }
 
 html, body {
@@ -42,12 +43,17 @@ html, body {
 }
 
 .main-content {
-  flex-grow: 1; 
   display: flex;
   flex-direction: row;
   align-items: flex-start;
   justify-content: flex-start;
   height: 100%;
+}
+
+.svg-container {
+  width: 50%;
+  height:100%; /* Full width of its container */
+  justify-content: flex-start;
 }
 
 @media (max-width: 768px) {
@@ -56,10 +62,17 @@ html, body {
   }
   .main-content {
     flex-direction: column;
+    justify-content: center;
   }
   .sidebar{
     width:100%;
     flex-direction:row;
+  }
+  .svg-container{
+    width:100%;
+    align-items: center;
+    justify-content:center;
+
   }
 }
 
@@ -116,15 +129,8 @@ html, body {
   vertical-align: middle; /* Align span text with the middle of the label */
 }
 
-/* Validation Message */
-
 
 /* Styles for the SVG container */
-.svg-container {
-  width: 50%;
-  height:100%; /* Full width of its container */
-  justify-content: flex-start;
-}
 
 .svg-container svg {
   width: 100%;
@@ -147,8 +153,19 @@ html, body {
 }
 
 .svg-container svg g circle.highlighted-circle {
-  fill: var(--svg-circle-selected, red) !important; /* Red color for selected nodes */
+  fill: var(--svg-circle-selected); /* Red color for selected nodes */
 }
+.svg-container svg rect {
+  fill: var(--svg-rectangle-fill); /* Fill color for the nodes */
+  stroke: var(--svg-cirlce-stroke); /* Stroke color */
+  stroke-width: 1px; /* Stroke width */
+
+}
+
+.svg-container svg g rect.highlighted-rect {
+  fill: var(--svg-circle-selected); /* Red color for selected nodes */
+}
+
 
 /* Style for text within the SVG */
 .svg-container svg text {
@@ -161,6 +178,10 @@ html, body {
   stroke: var(--svg-line-stroke); /* Stroke color */
   stroke-width: 1px; /* Stroke width */
 }
+.svg-container svg line.highlighted-edge {
+  stroke: red;
+}
+
 .sliders {
   display: flex;
   flex-direction: column;
@@ -174,7 +195,7 @@ html, body {
   margin-right: 10px;
 }
 
-h1 {
+h1, h2 {
   color: var(--text-color);
   text-align:center;
   margin-bottom: 20px;

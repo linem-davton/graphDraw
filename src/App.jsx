@@ -2,7 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 
 import './App.css';
 import SVGComponent from './SVGComponent';
+import SVGPlatformModel from './SVGPlatformModel'
 import Sliders from './sliders';
+import SlidersPM from './slidersPM';
 import ScheduleVisualization from './ScheduleVisualization';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
@@ -32,12 +34,16 @@ const theme = createTheme({
 
 function App() {
   const [graph, setGraph] = useState({ nodes: [], edges: [] });
+  const [platformModel, setPlatformModel] = useState({ nodes: [], edges: [] })
   const [deleteMode, setDeleteMode] = useState(false);
   const [jsonData, setJsonData] = useState(null);
   const [scheduleData, setScheduleData] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
 
   const [highlightNode, setHighlightedNode] = useState(null);
+  const [highlightedEdge, setHighlightedEdge] = useState(null);
+  const [highlightNodePM, setHighlightedNodePM] = useState(null);
+  const [highlightedEdgePM, setHighlightedEdgePM] = useState(null);
   const fileInputRef = useRef(null);
 
   const message_size = 20;
@@ -147,6 +153,20 @@ function App() {
       }
       setGraph({ nodes: newNodes, edges: newEdges });
     }
+    {
+      const newNodes = [];
+      const newEdges = [];
+
+      jsonData?.platform?.nodes?.forEach(node => {
+        newNodes.push({ id: node.id.toString(), type: node.type })
+      });
+      jsonData?.platform?.links?.forEach(link => {
+        newEdges.push({ id: link.id.toString(), sender: link.start_node.toString(), receiver: link.end_node.toString(), bandwidth: link.bandwidth, delay: link.link_delay })
+
+      });
+      setPlatformModel({ nodes: newNodes, edges: newEdges });
+    }
+
   };
 
   useEffect(() => {
@@ -191,6 +211,7 @@ function App() {
 
   const loadDefaultJSON = () => {
     setJsonData(examplejson);
+    createGraph();
   };
 
 
@@ -238,6 +259,7 @@ function App() {
 
           {jsonData &&
             <>
+              <button className="button" onClick={() => scheduleGraph()}>Schedule Graph</button>
               <button className="button" onClick={addNode}>Add Node</button>
               <button className="button" onClick={addEdge}>Add Edge</button>
 
@@ -249,7 +271,6 @@ function App() {
                   <span>Delete Mode</span>
                 </label>
               </Tooltip>
-              <button className="button" onClick={() => scheduleGraph()}>Schedule Graph</button>
               <button className="button" onClick={downloadJsonFile}>Download JSON</button>
             </>
           }
@@ -259,8 +280,8 @@ function App() {
           <footer style={{ padding: '20px 0', marginTop: 'auto' }}>
             <Container maxWidth="sm">
               <Typography variant="body1" align="center">
-                <Link href="https://github.com/linem-davton/graphdraw-frontend" underline="hover" target="_blank" rel="noopener noreferrer">
-                  GitHub Frontend
+                <Link href="https://eslab2docs.pages.dev/" underline="hover" target="_blank" rel="noopener noreferrer">
+                  Documentation
                 </Link>
               </Typography>
               <Typography variant="body1" align="center">
@@ -269,8 +290,8 @@ function App() {
                 </Link>
               </Typography>
               <Typography variant="body1" align="center">
-                <Link href="https://eslab2docs.pages.dev/" underline="hover" target="_blank" rel="noopener noreferrer">
-                  Task Documentation
+                <Link href="https://github.com/linem-davton/graphdraw-frontend" underline="hover" target="_blank" rel="noopener noreferrer">
+                  GitHub Frontend
                 </Link>
               </Typography>
             </Container>
@@ -279,16 +300,29 @@ function App() {
 
         <div className="main-content">
           <div className="svg-container">
+            <h2>Application Model</h2>
             <SVGComponent
               graph={graph}
               setGraph={setGraph}
               deleteMode={deleteMode}
               highlightNode={highlightNode}
               setHighlightedNode={setHighlightedNode}
+              highlightedEdge={highlightedEdge}
+              setHighlightedEdge={setHighlightedEdge}
             />
 
             {highlightNode !== null && <Sliders highlightNode={highlightNode} graph={graph} setGraph={setGraph} />}
-
+            <h2>Platform Model</h2>
+            <SVGPlatformModel
+              graph={platformModel}
+              setGraph={setPlatformModel}
+              deleteMode={deleteMode}
+              highlightNode={highlightNodePM}
+              setHighlightedNode={setHighlightedNodePM}
+              highlightedEdge={highlightedEdgePM}
+              setHighlightedEdge={setHighlightedEdgePM}
+            />
+            {highlightedEdgePM !== null && <SlidersPM highlightedEdge={highlightedEdgePM} graph={platformModel} setGraph={setPlatformModel} />}
           </div>
 
           {scheduleData &&
