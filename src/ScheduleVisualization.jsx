@@ -4,13 +4,16 @@ import * as d3 from 'd3';
 const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
 const Test1 = ({ schedules }) => {
+  const graphWidth = 600;
+  const graphHeight = 300;
+
   useEffect(() => {
     if (schedules) {
       Object.keys(schedules).forEach((scheduleKey, index) => {
         const svg = d3.select(`#${scheduleKey}`);
-        const margin = { top: 40, right: 20, bottom: 50, left: 50 }; // Increased top margin for algorithm name
-        const width = 300 - margin.left - margin.right;
-        const height = 200 - margin.top - margin.bottom;
+        const margin = { top: 80, right: 10, bottom: 50, left: 50 }; // Increased top margin for algorithm name
+        const width = graphWidth - margin.left - margin.right;
+        const height = graphHeight - margin.top - margin.bottom;
 
         svg.selectAll('*').remove();
 
@@ -18,15 +21,15 @@ const Test1 = ({ schedules }) => {
           .attr('transform', `translate(${margin.left}, ${margin.top})`);
 
         const nodes = Array.from(new Set(schedules[scheduleKey].schedule.map(job => job.node_id)));
-        const maxEndTime = d3.max(schedules[scheduleKey].schedule.map(job => job.end_time));
+        const endTime = d3.max(schedules[scheduleKey].schedule.map(job => job.end_time));
         const start_time = d3.min(schedules[scheduleKey].schedule.map(job => job.start_time)); // Calculate the minimum start_time
 
         console.log('start_time', start_time);
-        console.log('maxEndTime', maxEndTime);
+        console.log('maxEndTime', endTime);
         console.log('nodes', nodes);
 
         const xScale = d3.scaleLinear()
-          .domain([start_time, maxEndTime]) // Adjust the domain to include start_time
+          .domain([start_time, endTime]) // Adjust the domain to include start_time
           .range([0, width]);
 
         const yScale = d3.scaleBand()
@@ -41,7 +44,7 @@ const Test1 = ({ schedules }) => {
 
         g.append('g')
           .call(d3.axisLeft(yScale))
-          .style('color', '#00b894');
+          .style('color', '#dfe6e9');
 
         // X-axis label
         g.append('text')
@@ -59,10 +62,10 @@ const Test1 = ({ schedules }) => {
           .attr('dy', '1em')
           .style('text-anchor', 'middle')
           .text('Nodes')
-          .style('fill', '#00b894');
+          .style('fill', '#dfe6e9');
 
         // Algorithm name
-        const algorithmNames = ['LDF', 'EDF', 'RMS', 'LL'];
+        const algorithmNames = ['LDF', 'EDF', 'LL', 'LDF Multi-Node', 'EDF Multi-Node'];
         const algorithmName = algorithmNames[index];
 
         g.append('text')
@@ -70,7 +73,9 @@ const Test1 = ({ schedules }) => {
           .attr('y', -margin.top / 2)
           .attr('text-anchor', 'middle')
           .text(algorithmName)
-          .style('fill', '#00b894');
+          .style('fill', '#00b894')
+          .style('font-size', '20px')
+          .style('font-weight', 'bold');
 
         const schedule = schedules[scheduleKey].schedule
 
@@ -90,9 +95,8 @@ const Test1 = ({ schedules }) => {
           .attr('x', d => xScale(d.start_time) + 10)
           .attr('y', d => yScale(d.node_id) + yScale.bandwidth() / 2)
           .attr('dy', '0.35em')
-          .text(d => `Task ${d.job_id}`)
+          .text(d => `Task ${d.task_id}`)
           .style('fill', '#dfe6e9')
-          // .style('font-weight','bold')
           .style('font-size', '12px');
       });
     }
@@ -100,10 +104,12 @@ const Test1 = ({ schedules }) => {
 
   return (
     <>
-      <svg id="schedule1" width={300} height={200}></svg>
-      <svg id="schedule2" width={300} height={200}></svg>
-      <svg id="schedule3" width={300} height={200}></svg>
-      <svg id="schedule4" width={300} height={200}></svg>
+      <svg id="schedule1" width={graphWidth} height={graphHeight}></svg>
+      <svg id="schedule2" width={graphWidth} height={graphHeight}></svg>
+      <svg id="schedule3" width={graphWidth} height={graphHeight}></svg>
+      <svg id="schedule4" width={graphWidth} height={graphHeight}></svg>
+      <svg id="schedule5" width={graphWidth} height={graphHeight}></svg>
+
     </>
   );
 };

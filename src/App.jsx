@@ -118,21 +118,18 @@ function App() {
   };
 
   const createGraph = () => {
-    if (jsonData && jsonData.application && jsonData.application.jobs) {
-      console.log(jsonData.application.jobs);
+    if (jsonData?.application?.tasks) {
       const newNodes = [];
       const newEdges = [];
-      jsonData.application.jobs.forEach((job) => {
-        const nodeid = job.id;
-        const wcet = job.wcet_fullspeed;
-        const mcet = job.mcet;
-        const deadline = job.deadline;
-        console.log(nodeid);
+      jsonData.application.tasks.forEach((task) => {
+        const nodeid = task.id;
+        const wcet = task.wcet;
+        const mcet = task.mcet;
+        const deadline = task.deadline;
         newNodes.push({ id: nodeid.toString(), wcet: wcet, mcet: mcet, deadline: deadline });
       });
 
-
-      if (jsonData.application.messages) {
+      if (jsonData?.application?.messages) {
         jsonData.application.messages.forEach((message) => {
           const sender = message.sender.toString();
           const receiver = message.receiver.toString();
@@ -149,8 +146,6 @@ function App() {
         });
       }
       setGraph({ nodes: newNodes, edges: newEdges });
-      console.log(graph)
-      //console.log(jsonData)
     }
   };
 
@@ -204,7 +199,7 @@ function App() {
       setErrorMessage('No jobs to schedule');
       return;
     }
-    const request = { application: { jobs: graph.nodes, messages: graph.edges }, platform: jsonData.platform };
+    const request = { application: { tasks: graph.nodes, messages: graph.edges }, platform: jsonData.platform };
 
     try {
       const response = await fetch('http://localhost:8000/schedule_jobs', {

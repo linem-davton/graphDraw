@@ -1,27 +1,27 @@
 {
   "application": {
-    "jobs": [
+    "tasks": [
       {
         "id": 0,
-        "wcet_fullspeed": 20,
+        "wcet": 20,
         "mcet": 10,
         "deadline": 250
       },
       {
         "id": 1,
-        "wcet_fullspeed": 20,
+        "wcet": 20,
         "mcet": 10,
         "deadline": 250
       },
       {
         "id": 2,
-        "wcet_fullspeed": 20,
+        "wcet": 20,
         "mcet": 10,
         "deadline": 300
       },
       {
         "id": 3,
-        "wcet_fullspeed": 20,
+        "wcet": 20,
         "mcet": 10,
         "deadline": 256
       }
@@ -32,7 +32,6 @@
         "sender": 1,
         "receiver": 0,
         "size": 40,
-        "timetriggered": 1,
         "injection_time": 100
       },
       {
@@ -40,7 +39,6 @@
         "sender": 2,
         "receiver": 1,
         "size": 40,
-        "timetriggered": 1,
         "injection_time": 105
       },
       {
@@ -48,7 +46,6 @@
         "sender": 3,
         "receiver": 1,
         "size": 40,
-        "timetriggered": 1,
         "injection_time": 50
       }
     ]
