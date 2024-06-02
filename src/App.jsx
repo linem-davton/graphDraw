@@ -119,7 +119,8 @@ function App() {
   };
 
   const handleFileUpload = () => {
-    setHighlightedNode(null);
+    setHighlightedTask(null);
+    setHighlightedEdgePM(null);
     fileInputRef.current.click();
   };
 

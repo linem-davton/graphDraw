@@ -34,16 +34,16 @@ function SlidersAM({ highlightNode, graph, setGraph }) {
     <div className='sliders'>
       <Box sx={{ width: '100%' }}>
         <Stack spacing={2} direction="row" sx={{ mb: 1 }} alignItems="center">
-          <span>WCET:{highlightedNode.wcet}</span>
+          <span>WCET</span>
           <Slider value={highlightedNode.wcet} min={1} max={100} step={1} color="primary"
             onChange={(_event, newValue) => handleSliderChange('wcet', newValue)} />
-          <span sx={{ color: 'text.primary' }}>100</span>
+          <span sx={{ color: 'text.primary' }}>{highlightedNode.wcet}</span>
         </Stack>
         <Stack spacing={2} direction="row" sx={{ mb: 1 }} alignItems="center">
-          <span>Deadline:{highlightedNode.deadline}</span>
+          <span>Deadline</span>
           <Slider value={highlightedNode.deadline} min={1} max={1000} step={1} color="primary"
             onChange={(_event, newValue) => handleSliderChange('deadline', newValue)} />
-          <span>1000</span>
+          <span>{highlightedNode.deadline}</span>
         </Stack>
       </Box>
     </div >

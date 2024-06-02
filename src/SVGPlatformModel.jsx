@@ -7,6 +7,13 @@ const SVGPlatformModel = ({ graph, setGraph, deleteMode, highlightNode, setHighl
   const svgRef = useRef();
   const nodeRadius = 5;
 
+  const legendData = [
+    { type: 'Compute', color: '#00b894' },  // Assuming default fill is white
+    { type: 'Router', color: '#e67e22' },   // Assuming default fill is black
+    { type: 'Sensor', color: 'blue' },
+    { type: 'Actuator', color: 'green' }
+  ];
+
   const handleNodeClick = (nodeId) => {
     if (deleteMode) {
       const newNodes = graph.nodes.filter(node => node.id !== nodeId);
@@ -22,6 +29,22 @@ const SVGPlatformModel = ({ graph, setGraph, deleteMode, highlightNode, setHighl
 
     }
   };
+  function handleEdgeClick(edge) {
+    if (deleteMode) {
+      setGraph(prevGraph => {
+        const newEdges = prevGraph.links.filter(e => !(e.start_node == edge.v && e.end_node == edge.w));
+        return { nodes: prevGraph.nodes, links: newEdges };
+      });
+    } else {
+      setHighlightedEdge(prev => {
+        if (prev?.start_node == edge.v && prev?.end_node == edge.w)
+          return null;
+        else
+          return { start_node: edge.v, end_node: edge.w };
+      });
+    }
+  }
+
 
   const calculateBoundaryPoint = (source, target) => {
     const deltaX = target.x - source.x;
@@ -97,7 +120,7 @@ const SVGPlatformModel = ({ graph, setGraph, deleteMode, highlightNode, setHighl
     // Add edges to the graph
     graph.links.forEach(edge => {
       g.setEdge(edge.start_node, edge.end_node, {
-        width: 10, height: 10, label: edge.label, curve: d3.curveBasis
+        width: 10, height: 10, label: edge.link_delay, curve: d3.curveBasis
       });
     });
 
@@ -115,17 +138,29 @@ const SVGPlatformModel = ({ graph, setGraph, deleteMode, highlightNode, setHighl
       .on('click', function(event, d) {
         handleNodeClick(d.label);
       });
+
     nodes.each(function(d) {
       const node = d3.select(this);
-      if (d.shape === 'compute') {
-        node.append('circle')
-          .attr('r', nodeRadius)
-      } else if (d.shape === 'router') {
-        node.append('rect')
-          .attr('width', nodeRadius * 2)
-          .attr('height', nodeRadius * 2)
-          .attr('x', -nodeRadius)
-          .attr('y', -nodeRadius)
+      switch (d.shape) {
+        case 'compute':
+          node.append('circle')
+            .attr('r', nodeRadius)
+          break;
+        case 'router':
+          node.append('circle')
+            .attr('r', nodeRadius)
+            .style("fill", '#e67e22')
+          break;
+        case 'sensor':
+          node.append('circle') // Using ellipse to represent sensors
+            .attr('r', nodeRadius)
+            .style('fill', 'blue'); // Example color
+          break;
+        case 'actuator':
+          node.append('circle') // Using polygon to represent actuators
+            .attr('r', nodeRadius)
+            .style('fill', 'green'); // Example color
+          break;
       }
     });
 
@@ -136,37 +171,64 @@ const SVGPlatformModel = ({ graph, setGraph, deleteMode, highlightNode, setHighl
       .style("fill", "white")
       .text(d => d.label); // Assuming each node has a "name" property
 
-    svg.selectAll('.edge')
+    const edges = svg.selectAll('.edge')
       .data(g.edges())
       .enter()
-      .append('line')
+      .append('g')
       .attr('class', 'edge')
-      .attr('x1', d => calculateBoundaryPoint(g.node(d.v), g.node(d.w)).x,)
+      .on("click", function(event, d) {
+        handleEdgeClick(d); // centralizing click logic
+      });
+
+    // Adding lines
+    edges.append('line')
+      .attr('x1', d => calculateBoundaryPoint(g.node(d.v), g.node(d.w)).x)
       .attr('y1', d => calculateBoundaryPoint(g.node(d.v), g.node(d.w)).y)
       .attr('x2', d => calculateBoundaryPoint(g.node(d.w), g.node(d.v)).x)
-      .attr('y2', d => calculateBoundaryPoint(g.node(d.w), g.node(d.v)).y)
-      .classed("highlighted-edge", d => {
-        return (d.v === highlightedEdge?.start_node && d.w === highlightedEdge?.end_node);
+      .attr('y2', d => calculateBoundaryPoint(g.node(d.w), g.node(d.v)).y);
+
+    // Adding labels to the edges
+    edges.append('text')
+      .attr('x', d => {
+        const source = calculateBoundaryPoint(g.node(d.v), g.node(d.w));
+        const target = calculateBoundaryPoint(g.node(d.w), g.node(d.v));
+        return (source.x + target.x) / 2;
       })
-      .on("click", function(event, edge) {
-        if (deleteMode) {
-          if (edge.v == highlightedEdge?.start_node && edge.w == highlightedEdge?.end_node) {
-            setHighlightedEdge(null);
-          }
-          setGraph(prevGraph => {
-            console.log(edge)
-            const newEdges = prevGraph.links.filter(e => !(e.start_node == edge.v && e.end_node == edge.w));
-            return { nodes: prevGraph.nodes, links: newEdges };
-          });
-        } else {
-          setHighlightedEdge(prev => {
-            if (prev?.start_node == edge.v && prev?.end_node == edge.w)
-              return null;
-            else
-              return { start_node: edge.v, end_node: edge.w };
-          })
-        }
+      .attr('y', d => {
+        const source = calculateBoundaryPoint(g.node(d.v), g.node(d.w));
+        const target = calculateBoundaryPoint(g.node(d.w), g.node(d.v));
+        return (source.y + target.y) / 2;
+      })
+      .text(d => g.edge(d).label)
+      .attr('font-size', '10px') // Adjust font size as necessary
+      .attr('text-anchor', 'middle')
+      .attr('dy', -4); // Adjust vertical offset to not overlap with the edge line
+
+
+    const legend = svg.append('g')
+      .attr('class', 'legend')
+      .attr('transform', `translate(${g.graph().width - 12}, ${g.graph().height - 38})`);  // Adjust for your SVG size
+
+    legend.selectAll('.legend-item')
+      .data(legendData)
+      .enter()
+      .append('g')
+      .attr('class', 'legend-item')
+      .attr('transform', (d, i) => `translate(0, ${i * 10})`)  // Stacks items vertically, adjust spacing as needed
+      .each(function(d) {
+        const item = d3.select(this);
+        item.append('rect')  // Color block
+          .attr('width', nodeRadius)
+          .attr('height', nodeRadius)
+          .style('fill', d.color);
+
+        item.append('text')  // Text label
+          .attr('x', 10)  // Offset text to the right of the rectangle
+          .attr('y', 4)  // Vertical alignment
+          .text(d.type)
+          .style("text-anchor", "start");
       });
+
 
   }, [graph, deleteMode, highlightNode, highlightedEdge]);
 

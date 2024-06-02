@@ -91,6 +91,14 @@
       {
         "id": 9,
         "type": "router"
+      },
+      {
+        "id": 10,
+        "type": "sensor"
+      },
+      {
+        "id": 11,
+        "type": "actuator"
       }
     ],
     "links": [
@@ -170,6 +178,22 @@
         "id": 9,
         "start_node": 6,
         "end_node": 9,
+        "link_delay": 4,
+        "bandwidth": 20,
+        "type": "ethernet"
+      },
+      {
+        "id": 10,
+        "start_node": 10,
+        "end_node": 9,
+        "link_delay": 10,
+        "bandwidth": 20,
+        "type": "ethernet"
+      },
+      {
+        "id": 11,
+        "start_node": 11,
+        "end_node": 7,
         "link_delay": 4,
         "bandwidth": 20,
         "type": "ethernet"

@@ -34,16 +34,16 @@ function SlidersPM({ highlightedEdge, graph, setGraph }) {
     <div className='sliders'>
       <Box sx={{ width: '100%' }}>
         <Stack spacing={2} direction="row" sx={{ mb: 1 }} alignItems="center">
-          <span>Delay:{edge.link_delay}</span>
+          <span>Delay</span>
           <Slider value={edge.link_delay} min={1} max={100} step={1} color="primary"
             onChange={(_event, newValue) => handleSliderChange('link_delay', newValue)} />
-          <span sx={{ color: 'text.primary' }}>10</span>
+          <span sx={{ color: 'text.primary' }}>{edge.link_delay}</span>
         </Stack>
         <Stack spacing={2} direction="row" sx={{ mb: 1 }} alignItems="center">
-          <span>Bandwidth:{edge.bandwidth}</span>
+          <span>Bandwidth</span>
           <Slider value={edge.bandwidth} min={1} max={100} step={1} color="primary"
             onChange={(_event, newValue) => handleSliderChange('bandwidth', newValue)} />
-          <span>100</span>
+          <span>{edge.bandwidth}</span>
         </Stack>
       </Box>
     </div >
