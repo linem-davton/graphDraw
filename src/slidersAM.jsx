@@ -4,26 +4,20 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 
 
-function Sliders({ highlightNode, graph, setGraph }) {
-  if (!graph || !graph.nodes) {
+function SlidersAM({ highlightNode, graph, setGraph }) {
+  if (!graph || !graph.tasks) {
     return (<div></div>);
   }
 
-  const highlightedNode = graph.nodes.find(node => node.id === highlightNode)
+  const highlightedNode = graph.tasks.find(node => node.id === highlightNode)
   console.log('highlightNode', highlightNode);
-
-  const resetSlider = () => {
-    setWcet(10);
-    setDeadline(10);
-    return;
-  }
 
   const handleSliderChange = (slider, newValue) => {
     console.log(slider, newValue);
     // Update the graph state immutably
     setGraph(prevGraph => {
       // Map over nodes to find the node to update
-      const updatedNodes = prevGraph.nodes.map(node => {
+      const updatedNodes = prevGraph.tasks.map(node => {
         // Check if the current node is the one to update
         if (node.id === highlightNode) {
           // Update the specific property (wcet or deadline) based on the slider
@@ -33,7 +27,7 @@ function Sliders({ highlightNode, graph, setGraph }) {
       });
 
       // Return a new graph object with the updated nodes array
-      return { ...prevGraph, nodes: updatedNodes };
+      return { ...prevGraph, tasks: updatedNodes };
     });
   }
   return (
@@ -55,4 +49,4 @@ function Sliders({ highlightNode, graph, setGraph }) {
     </div >
   );
 }
-export default Sliders;
+export default SlidersAM;

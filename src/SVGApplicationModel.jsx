@@ -3,18 +3,18 @@ import * as d3 from 'd3';
 import dagre from 'dagre';
 
 
-const SVGComponent = ({ graph, setGraph, deleteMode, highlightNode, setHighlightedNode, highlightedEdge, setHighlightedEdge }) => {
+const SVGApplicationModel = ({ graph, setGraph, deleteMode, highlightNode, setHighlightedNode, highlightedEdge, setHighlightedEdge }) => {
   const svgRef = useRef();
   const nodeRadius = 5;
 
   const handleNodeClick = (nodeId) => {
     if (deleteMode) {
-      const newNodes = graph.nodes.filter(node => node.id !== nodeId);
-      const newEdges = graph.edges.filter(edge => edge.sender !== nodeId && edge.receiver !== nodeId);
+      const newTasks = graph.tasks.filter(node => node.id !== nodeId);
+      const newMessages = graph.messages.filter(edge => edge.sender !== nodeId && edge.receiver !== nodeId);
       if (nodeId === highlightNode) {
         setHighlightedNode(null)
       }
-      setGraph({ nodes: newNodes, edges: newEdges });
+      setGraph({ tasks: newTasks, messages: newMessages });
     } else {
       setHighlightedNode(node => {
         if (node === nodeId) {
@@ -39,9 +39,11 @@ const SVGComponent = ({ graph, setGraph, deleteMode, highlightNode, setHighlight
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove(); // Clear previous render
 
-    if (!graph || graph.nodes.length === 0) {
+    if (!graph || graph.tasks?.length === 0) {
       return; // Exit if data is empty or improperly structured
     }
+
+    console.log(graph);
     // Create a new directed graph
     var g = new dagre.graphlib.Graph();
     g.setGraph({
@@ -55,14 +57,14 @@ const SVGComponent = ({ graph, setGraph, deleteMode, highlightNode, setHighlight
     g.setDefaultEdgeLabel(() => ({}));
 
     // Add nodes to the graph
-    graph.nodes.forEach(node => {
+    graph.tasks.forEach(node => {
       g.setNode(node.id, { label: node.id, width: 10, height: 10 });
     });
 
     // Add edges to the graph
-    graph.edges.forEach(edge => {
+    graph.messages.forEach(edge => {
       g.setEdge(edge.sender, edge.receiver, {
-        width: 10, height: 10, label: edge.label, curve: d3.curveBasis
+        width: 10, height: 10, label: edge.id, curve: d3.curveBasis
       });
     });
 
@@ -108,8 +110,8 @@ const SVGComponent = ({ graph, setGraph, deleteMode, highlightNode, setHighlight
       .on("click", function(event, edge) {
         if (deleteMode) {
           setGraph(prevGraph => {
-            const newEdges = prevGraph.edges.filter(e => !(e.sender === edge.v && e.receiver === edge.w));
-            return { nodes: prevGraph.nodes, edges: newEdges };
+            const newMessages = prevGraph.messages.filter(e => !(e.sender === edge.v && e.receiver === edge.w));
+            return { tasks: prevGraph.tasks, messages: newMessages };
           });
         }
         setHighlightedEdge(prev => {
@@ -143,4 +145,4 @@ const SVGComponent = ({ graph, setGraph, deleteMode, highlightNode, setHighlight
   );
 };
 
-export default SVGComponent;
+export default SVGApplicationModel;

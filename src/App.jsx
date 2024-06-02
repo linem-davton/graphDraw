@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 
 import './App.css';
-import SVGComponent from './SVGComponent';
+import SVGApplicationModel from './SVGApplicationModel';
 import SVGPlatformModel from './SVGPlatformModel'
-import Sliders from './sliders';
+import SlidersAM from './slidersAM';
 import SlidersPM from './slidersPM';
 import ScheduleVisualization from './ScheduleVisualization';
 import Typography from '@mui/material/Typography';
@@ -42,15 +42,15 @@ const loadFromLocalStorage = (key) => {
 };
 
 function App() {
-  const [graph, setGraph] = useState({ nodes: [], edges: [] });
+  const [applicationModel, setApplicationModel] = useState(null);
   const [platformModel, setPlatformModel] = useState(null)
   const [deleteMode, setDeleteMode] = useState(false);
   const [jsonData, setJsonData] = useState(null);
   const [scheduleData, setScheduleData] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
 
-  const [highlightNode, setHighlightedNode] = useState(null);
-  const [highlightedEdge, setHighlightedEdge] = useState(null);
+  const [highlightedTask, setHighlightedTask] = useState(null);
+  const [highlightedMessage, setHighlightedMessage] = useState(null);
   const [highlightNodePM, setHighlightedNodePM] = useState(null);
   const [highlightedEdgePM, setHighlightedEdgePM] = useState(null);
   const fileInputRef = useRef(null);
@@ -67,7 +67,7 @@ function App() {
 
   const handleSave = () => {
     const dataToSave = {
-      application: { tasks: graph.nodes, messages: graph.edges },
+      application: applicationModel,
       platform: platformModel
     };
     saveToLocalStorage('model', dataToSave);
@@ -80,40 +80,38 @@ function App() {
     }
   };
 
-  const addNode = () => {
-    const nodeId = graph.nodes.length;
+  const addTasks = () => {
+    const taskId = applicationModel.tasks.length;
 
     const wcet = parseInt(prompt('Enter WCET (in milliseconds) for the new node:'));
     const mcet = parseInt(prompt('Enter MCET (in milliseconds) for the new node:'));
     const deadline = parseInt(prompt('Enter deadline (in milliseconds) for the new node:'));
 
     if (!isNaN(wcet) && !isNaN(mcet) && !isNaN(deadline)) {
-      setGraph(prevGraph => ({
+      setApplicationModel(prevGraph => ({
         ...prevGraph,
-        nodes: [...prevGraph.nodes, { id: nodeId.toString(), wcet: wcet, mcet: mcet, deadline: deadline }]
+        tasks: [...prevGraph.tasks, { id: taskId, wcet: wcet, mcet: mcet, deadline: deadline }]
       }));
 
     }
   };
 
-  const addEdge = () => {
-    const msgId = graph.edges.length;
-    const sender = prompt('Enter sender node:');
-    const receiver = prompt('Enter receiver node:');
-    const sourceNodeExists = graph.nodes.some(node => node.id === sender)
-    const targetNodeExists = graph.nodes.some(node => node.id === receiver);
+  const addMessages = () => {
+    const msgId = applicationModel.messages.length;
+    const sender = parseInt(prompt('Enter sender node:'));
+    const receiver = parseInt(prompt('Enter receiver node:'));
+    const sourceNodeExists = applicationModel.tasks.some(node => node.id === sender)
+    const targetNodeExists = applicationModel.tasks.some(node => node.id === receiver);
 
     if (sourceNodeExists && targetNodeExists) {
       const size = message_size;
-      const edge = { id: msgId.toString(), sender: sender, receiver: receiver, size: size, message_injection_time: message_injection_time }
+      const message = { id: msgId, sender: sender, receiver: receiver, size: size, message_injection_time: message_injection_time }
 
       if (!isNaN(size)) {
-        setGraph(prevGraph => ({
+        setApplicationModel(prevGraph => ({
           ...prevGraph,
-          edges: [...prevGraph.edges, edge]
+          messages: [...prevGraph.messages, message]
         }));
-
-        // updateJsonDataWithEdge(source, target, size); // Update jsonData
       }
     } else {
       alert('One or both nodes do not exist');
@@ -131,10 +129,8 @@ function App() {
     readFileContents(file);
 
   };
-
   const readFileContents = (file) => {
     const reader = new FileReader();
-
     reader.onload = (e) => {
       const contents = e.target.result;
       try {
@@ -150,35 +146,7 @@ function App() {
   };
 
   const createGraph = () => {
-    if (jsonData?.application?.tasks) {
-      const newNodes = [];
-      const newEdges = [];
-      jsonData.application.tasks.forEach((task) => {
-        const nodeid = task.id;
-        const wcet = task.wcet;
-        const mcet = task.mcet;
-        const deadline = task.deadline;
-        newNodes.push({ id: nodeid.toString(), wcet: wcet, mcet: mcet, deadline: deadline });
-      });
-
-      if (jsonData?.application?.messages) {
-        jsonData.application.messages.forEach((message) => {
-          const sender = message.sender.toString();
-          const receiver = message.receiver.toString();
-          const size = message.size;
-          const id = message.id;
-          const injection_time = message.injection_time;
-          const senderNodeExists = newNodes.some((node) => node.id === sender);
-          const receiverNodeExists = newNodes.some((node) => node.id === receiver);
-          if (senderNodeExists && receiverNodeExists) {
-            newEdges.push({ id: id, sender: sender, receiver: receiver, size: size, injection_time: injection_time })
-          } else {
-            alert('One or both nodes do not exist');
-          }
-        });
-      }
-      setGraph({ nodes: newNodes, edges: newEdges });
-    }
+    setApplicationModel(jsonData?.application);
     setPlatformModel(jsonData?.platform);
   };
 
@@ -188,19 +156,16 @@ function App() {
 
   useEffect(() => {
     scheduleGraph();
-
-  }, [graph, platformModel])
+  }, [applicationModel, platformModel])
 
   const downloadJsonFile = () => {
-    // Combine the existing jsonData with the new nodes and edges
     if (!jsonData) {
       setErrorMessage('No JSON data to download');
       return;
     }
     const combinedJsonData = {
-      application: { tasks: graph.nodes, messages: graph.edges },
+      application: applicationModel,
       platform: platformModel
-      // Add any new properties if necessary
     };
 
     // Convert the combined JSON data to a string
@@ -229,17 +194,15 @@ function App() {
 
   const loadDefaultJSON = () => {
     setJsonData(examplejson);
-    createGraph();
   };
 
-
   const scheduleGraph = async () => {
-    if (graph.nodes.length === 0) {
+    if (!applicationModel || !platformModel) {
       setErrorMessage('No jobs to schedule');
       return;
     }
     const request = {
-      application: { tasks: graph.nodes, messages: graph.edges }, platform: platformModel
+      application: applicationModel, platform: platformModel
     };
 
     try {
@@ -279,8 +242,8 @@ function App() {
 
           {jsonData &&
             <>
-              <button className="button" onClick={addNode}>Add Task</button>
-              <button className="button" onClick={addEdge}>Add Task Dependency</button>
+              <button className="button" onClick={addTasks}>Add Task</button>
+              <button className="button" onClick={addMessages}>Add Task Dependency</button>
 
               <Tooltip title="Enable this mode to delete nodes and edges by clicking on them.">
                 <label className="checkbox-label">
@@ -322,17 +285,17 @@ function App() {
         <div className="main-content">
           <div className="svg-container">
             <h2>Application Model</h2>
-            <SVGComponent
-              graph={graph}
-              setGraph={setGraph}
+            <SVGApplicationModel
+              graph={applicationModel}
+              setGraph={setApplicationModel}
               deleteMode={deleteMode}
-              highlightNode={highlightNode}
-              setHighlightedNode={setHighlightedNode}
-              highlightedEdge={highlightedEdge}
-              setHighlightedEdge={setHighlightedEdge}
+              highlightNode={highlightedTask}
+              setHighlightedNode={setHighlightedTask}
+              highlightedEdge={highlightedMessage}
+              setHighlightedEdge={setHighlightedMessage}
             />
 
-            {highlightNode !== null && <Sliders highlightNode={highlightNode} graph={graph} setGraph={setGraph} />}
+            {highlightedTask !== null && <SlidersAM highlightNode={highlightedTask} graph={applicationModel} setGraph={setApplicationModel} />}
             <h2>Platform Model</h2>
             <SVGPlatformModel
               graph={platformModel}
