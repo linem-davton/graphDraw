@@ -10,7 +10,7 @@ const SVGApplicationModel = ({ graph, setGraph, deleteMode, highlightNode, setHi
   const handleNodeClick = (nodeId) => {
     if (deleteMode) {
       const newTasks = graph.tasks.filter(node => node.id !== nodeId);
-      const newMessages = graph.messages.filter(edge => edge.sender !== nodeId && edge.receiver !== nodeId);
+      const newMessages = graph.messages.filter(edge => edge.sender !== nodeId || edge.receiver !== nodeId);
       if (nodeId === highlightNode) {
         setHighlightedNode(null)
       }

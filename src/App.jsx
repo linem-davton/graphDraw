@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 
+import Ajv from 'ajv';
+
 import './App.css';
 import SVGApplicationModel from './SVGApplicationModel';
 import SVGPlatformModel from './SVGPlatformModel'
@@ -12,6 +14,7 @@ import Link from '@mui/material/Link';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Tooltip from '@mui/material/Tooltip';
 import examplejson from './example1.json';
+import schema from './input_schema.json';
 
 
 const theme = createTheme({
@@ -137,8 +140,18 @@ function App() {
       try {
         const parsedData = JSON.parse(contents);
         // to do  Validate the JSON data to schema before setting the state
-        setJsonData(parsedData);
+        const ajv = new Ajv(); // options can be passed, e.g. {allErrors: true}
+        const validate = ajv.compile(schema);
+        const valid = validate(parsedData);
+
+        if (!valid) {
+          console.log('JSON Validation errors:', validate.errors);
+          setErrorMessage('JSON data does not match schema');
+        } else {
+          setJsonData(parsedData);
+        }
       } catch (error) {
+        setErrorMessage('Upload Valid JSON')
         console.error('Error parsing JSON:', error);
       }
     };
