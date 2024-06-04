@@ -17,7 +17,7 @@ const SVGPlatformModel = ({ graph, setGraph, deleteMode, highlightNode, setHighl
   const handleNodeClick = (nodeId) => {
     if (deleteMode) {
       const newNodes = graph.nodes.filter(node => node.id !== nodeId);
-      const newEdges = graph.links.filter(edge => edge.start_node !== nodeId || edge.end_node !== nodeId);
+      const newEdges = graph.links.filter(edge => edge.start_node !== nodeId && edge.end_node !== nodeId);
       setGraph({ nodes: newNodes, links: newEdges });
     } else {
       setHighlightedNode(node => {

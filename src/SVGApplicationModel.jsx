@@ -10,20 +10,31 @@ const SVGApplicationModel = ({ graph, setGraph, deleteMode, highlightNode, setHi
   const handleNodeClick = (nodeId) => {
     if (deleteMode) {
       const newTasks = graph.tasks.filter(node => node.id !== nodeId);
-      const newMessages = graph.messages.filter(edge => edge.sender !== nodeId || edge.receiver !== nodeId);
+      const newMessages = graph.messages.filter(edge => edge.sender !== nodeId && edge.receiver !== nodeId);
       if (nodeId === highlightNode) {
         setHighlightedNode(null)
       }
       setGraph({ tasks: newTasks, messages: newMessages });
     } else {
-      setHighlightedNode(node => {
-        if (node === nodeId) {
-          return null;
-        }
-        return nodeId;
-      });
-
+      setHighlightedNode(node => (node === nodeId ? null : nodeId));
     }
+  };
+  const handleEdgeClick = (edge) => {
+    if (deleteMode) {
+      setGraph(prevGraph => {
+        const newMessages = prevGraph.messages.filter(e => !(e.sender == edge.v && e.receiver == edge.w));
+        return { tasks: prevGraph.tasks, messages: newMessages };
+      });
+    }
+    else {
+      setHighlightedEdge(prev => {
+        if (prev?.sender === edge.v && prev?.receiver === edge.w)
+          return null;
+        else
+          return { sender: edge.v, receiver: edge.w };
+      })
+    }
+
   };
   const calculateBoundaryPoint = (source, target) => {
     const deltaX = target.x - source.x;
@@ -39,7 +50,7 @@ const SVGApplicationModel = ({ graph, setGraph, deleteMode, highlightNode, setHi
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove(); // Clear previous render
 
-    if (!graph || graph.tasks?.length === 0) {
+    if (!graph || !graph.tasks || !graph.messages) {
       return; // Exit if data is empty or improperly structured
     }
 
@@ -79,7 +90,6 @@ const SVGApplicationModel = ({ graph, setGraph, deleteMode, highlightNode, setHi
       .append('g')
       .attr('class', 'node')
       .attr('transform', d => `translate(${d.x},${d.y})`)
-
       .on('click', function(event, d) {
         handleNodeClick(d.label); // Function to handle node deletion
       });
@@ -107,20 +117,7 @@ const SVGApplicationModel = ({ graph, setGraph, deleteMode, highlightNode, setHi
       .attr('x2', d => calculateBoundaryPoint(g.node(d.w), g.node(d.v)).x)
       .attr('y2', d => calculateBoundaryPoint(g.node(d.w), g.node(d.v)).y)
       .attr('marker-end', 'url(#arrowhead)')
-      .on("click", function(event, edge) {
-        if (deleteMode) {
-          setGraph(prevGraph => {
-            const newMessages = prevGraph.messages.filter(e => !(e.sender === edge.v && e.receiver === edge.w));
-            return { tasks: prevGraph.tasks, messages: newMessages };
-          });
-        }
-        setHighlightedEdge(prev => {
-          if (prev?.sender === edge.v && prev?.receiver === edge.w)
-            return null;
-          else
-            return { sender: edge.v, receiver: edge.w };
-        })
-      });
+      .on("click", function(event, edge) { handleEdgeClick(edge); })
 
     svg.append('defs').append('marker')
       .attr('id', 'arrowhead')
