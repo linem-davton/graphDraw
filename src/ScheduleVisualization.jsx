@@ -23,11 +23,6 @@ const Test1 = ({ schedules }) => {
         const nodes = Array.from(new Set(schedules[scheduleKey].schedule.map(job => job.node_id)));
         const endTime = d3.max(schedules[scheduleKey].schedule.map(job => job.end_time));
         const start_time = d3.min(schedules[scheduleKey].schedule.map(job => job.start_time)); // Calculate the minimum start_time
-
-        console.log('start_time', start_time);
-        console.log('maxEndTime', endTime);
-        console.log('nodes', nodes);
-
         const xScale = d3.scaleLinear()
           .domain([start_time, endTime]) // Adjust the domain to include start_time
           .range([0, width]);

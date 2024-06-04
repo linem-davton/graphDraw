@@ -35,6 +35,14 @@ const theme = createTheme({
 
 });
 
+const nodeTypes = ['compute', 'router', 'sensor', 'actuator'];
+const link_delay = 10;
+const message_size = 20;
+const message_injection_time = 0;
+const wcet = 10;
+const mcet = 5;
+const deadline = 500;
+
 const saveToLocalStorage = (key, data) => {
   localStorage.setItem(key, JSON.stringify(data));
 };
@@ -45,12 +53,12 @@ const loadFromLocalStorage = (key) => {
 };
 
 function App() {
-  const [applicationModel, setApplicationModel] = useState(null);
-  const [platformModel, setPlatformModel] = useState(null)
+  const [applicationModel, setApplicationModel] = useState({ tasks: [], messages: [] })
+  const [platformModel, setPlatformModel] = useState({ nodes: [], links: [] })
   const [deleteMode, setDeleteMode] = useState(false);
-  const [jsonData, setJsonData] = useState(null);
   const [scheduleData, setScheduleData] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
+  const [selectedSVG, setSelectedSVG] = useState(null);
 
   const [highlightedTask, setHighlightedTask] = useState(null);
   const [highlightedMessage, setHighlightedMessage] = useState(null);
@@ -58,8 +66,6 @@ function App() {
   const [highlightedEdgePM, setHighlightedEdgePM] = useState(null);
   const fileInputRef = useRef(null);
   const [savedData, setSavedData] = useState(null);
-  const message_size = 20;
-  const message_injection_time = 0;
 
   useEffect(() => {
     const data = loadFromLocalStorage('model');
@@ -79,17 +85,19 @@ function App() {
 
   const handleSavedLoad = () => {
     if (savedData) {
-      setJsonData(savedData);
+      setApplicationModel(savedData.application);
+      setPlatformModel(savedData.platform);
     }
   };
 
+  const loadDefaultJSON = () => {
+    setApplicationModel(examplejson.application);
+    setPlatformModel(examplejson.platform);
+  };
+
+
   const addTasks = () => {
-    const taskId = applicationModel.tasks.length;
-
-    const wcet = parseInt(prompt('Enter WCET (in milliseconds) for the new node:'));
-    const mcet = parseInt(prompt('Enter MCET (in milliseconds) for the new node:'));
-    const deadline = parseInt(prompt('Enter deadline (in milliseconds) for the new node:'));
-
+    const taskId = applicationModel.tasks.length
     if (!isNaN(wcet) && !isNaN(mcet) && !isNaN(deadline)) {
       setApplicationModel(prevGraph => ({
         ...prevGraph,
@@ -101,8 +109,8 @@ function App() {
 
   const addMessages = () => {
     const msgId = applicationModel.messages.length;
-    const sender = parseInt(prompt('Enter sender node:'));
-    const receiver = parseInt(prompt('Enter receiver node:'));
+    const sender = parseInt(prompt('Enter sender task:'));
+    const receiver = parseInt(prompt('Enter receiver task:'));
     const sourceNodeExists = applicationModel.tasks.some(node => node.id === sender)
     const targetNodeExists = applicationModel.tasks.some(node => node.id === receiver);
 
@@ -117,8 +125,42 @@ function App() {
         }));
       }
     } else {
+      alert('One or both tasks do not exist');
+    }
+  };
+
+  const addNodes = () => {
+    const nodeId = platformModel.nodes.length;
+    const type = parseInt(prompt('Enter node type: 0-compute, 1-router, 2-sensor, 3-actuator'));
+    if (isNaN(type) || type < 0 || type > 3) {
+      alert('Invalid node type');
+      return;
+    }
+    setPlatformModel(prevGraph => ({
+      ...prevGraph,
+      nodes: [...prevGraph.nodes, { id: nodeId, type: nodeTypes[type] }]
+    }));
+  };
+  const addLinks = () => {
+    const linkId = platformModel.links.length;
+    const sender = parseInt(prompt('Enter start node:'));
+    const receiver = parseInt(prompt('Enter receiver node:'));
+    const sourceNodeExists = platformModel.nodes.some(node => node.id === sender)
+    const targetNodeExists = platformModel.nodes.some(node => node.id === receiver);
+
+    if (sourceNodeExists && targetNodeExists) {
+      const link = { id: linkId, start_node: sender, end_node: receiver, link_delay: link_delay }
+
+      if (!isNaN(link_delay)) {
+        setPlatformModel(prevGraph => ({
+          ...prevGraph,
+          links: [...prevGraph.links, link]
+        }));
+      }
+    } else {
       alert('One or both nodes do not exist');
     }
+
   };
 
   const handleFileUpload = () => {
@@ -148,7 +190,8 @@ function App() {
           console.log('JSON Validation errors:', validate.errors);
           setErrorMessage('JSON data does not match schema');
         } else {
-          setJsonData(parsedData);
+          setApplicationModel(parsedData.application);
+          setPlatformModel(parsedData.platform);
         }
       } catch (error) {
         setErrorMessage('Upload Valid JSON')
@@ -159,21 +202,13 @@ function App() {
 
   };
 
-  const createGraph = () => {
-    setApplicationModel(jsonData?.application);
-    setPlatformModel(jsonData?.platform);
-  };
-
   useEffect(() => {
-    createGraph();
-  }, [jsonData])
-
-  useEffect(() => {
-    scheduleGraph();
+    if (applicationModel.tasks.length && platformModel.nodes.length)
+      scheduleGraph();
   }, [applicationModel, platformModel])
 
   const downloadJsonFile = () => {
-    if (!jsonData) {
+    if (!applicationModel.tasks.length && !platformModel.nodes.length) {
       setErrorMessage('No JSON data to download');
       return;
     }
@@ -206,9 +241,6 @@ function App() {
     document.body.removeChild(link);
   };
 
-  const loadDefaultJSON = () => {
-    setJsonData(examplejson);
-  };
 
   const scheduleGraph = async () => {
     if (!applicationModel || !platformModel) {
@@ -243,9 +275,17 @@ function App() {
       });
       console.log("Response from backend:", data);
     } catch (error) {
-      setErrorMessage(`${error}`);
+      setErrorMessage(`Error Connecting to Server`);
       console.error("Error sending data to backend:", error);
     }
+  };
+
+  const handleSVGClick = (svg) => {
+    if (deleteMode) return;
+    if (svg === "ApplicationModel")
+      setSelectedSVG(prev => prev === "ApplicationModel" ? null : "ApplicationModel");
+    else
+      setSelectedSVG(prev => prev === "PlatformModel" ? null : "PlatformModel");
   };
 
   return (
@@ -254,11 +294,20 @@ function App() {
         <div className="sidebar">
           <h1>Distributed Scheduling</h1>
 
-          {jsonData &&
+          {selectedSVG === "ApplicationModel" &&
             <>
               <button className="button" onClick={addTasks}>Add Task</button>
               <button className="button" onClick={addMessages}>Add Task Dependency</button>
-
+            </>
+          }
+          {selectedSVG === "PlatformModel" &&
+            <>
+              <button className="button" onClick={addNodes}>Add Node</button>
+              <button className="button" onClick={addLinks}>Add Link</button>
+            </>
+          }
+          {((applicationModel.tasks.length && selectedSVG === "ApplicationModel") || (platformModel.nodes.length && selectedSVG === "PlatformModel")) &&
+            <>
               <Tooltip title="Enable this mode to delete nodes and edges by clicking on them.">
                 <label className="checkbox-label">
                   <input type="checkbox" id="deleteMode" checked={deleteMode} onChange={() => {
@@ -267,32 +316,34 @@ function App() {
                   <span>Delete Mode</span>
                 </label>
               </Tooltip>
-              <button className="button" onClick={downloadJsonFile}>Download JSON</button>
             </>
           }
-          <input type="file" accept=".json" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileChange} />
-          <button className="button" onClick={handleFileUpload}>Upload JSON</button>
-          <button className="button" onClick={loadDefaultJSON}>Load Default JSON</button>
-          {jsonData && <button className="button" onClick={handleSave}>Save Locally</button>}
-          {savedData && <button className="button" onClick={handleSavedLoad}>Load Last Saved</button>}
-          <footer style={{ padding: '20px 0', marginTop: 'auto' }}>
-            <Container maxWidth="sm">
-              <Typography variant="body1" align="center">
-                <Link href="https://eslab2docs.pages.dev/" underline="hover" target="_blank" rel="noopener noreferrer">
-                  Documentation
-                </Link>
-              </Typography>
-              <Typography variant="body1" align="center">
-                <Link href="https://github.com/linem-davton/es-lab-task2" underline="hover" target="_blank" rel="noopener noreferrer">
-                  GitHub Backend
-                </Link>
-              </Typography>
-              <Typography variant="body1" align="center">
-                <Link href="https://github.com/linem-davton/graphdraw-frontend" underline="hover" target="_blank" rel="noopener noreferrer">
-                  GitHub Frontend
-                </Link>
-              </Typography>
-            </Container>
+          {selectedSVG === null &&
+            <>
+              <input type="file" accept=".json" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileChange} />
+              <button className="button" onClick={handleFileUpload}>Upload JSON</button>
+              <button className="button" onClick={loadDefaultJSON}>Load Default JSON</button>
+              {savedData && <button className="button" onClick={handleSavedLoad}>Load Last Saved</button>}
+            </>
+          }
+          {(applicationModel.tasks.length || platformModel.nodes.length) &&
+            <>
+              <button className="button" onClick={downloadJsonFile}>Download JSON</button>
+
+              <button className="button" onClick={handleSave}>Save Locally</button>
+            </>}
+
+          <footer className="navbar">
+            <Typography variant="body1" align="center" className="footer-link">
+              <Link href="https://eslab2docs.pages.dev/" underline="hover" target="_blank" rel="noopener noreferrer">
+                Documentation
+              </Link>
+            </Typography>
+            <Typography variant="body1" align="center" className="footer-link">
+              <Link href="https://github.com/linem-davton/es-lab-task2" underline="hover" target="_blank" rel="noopener noreferrer">
+                GitHub Backend
+              </Link>
+            </Typography>
           </footer>
         </div>
 
@@ -307,6 +358,8 @@ function App() {
               setHighlightedNode={setHighlightedTask}
               highlightedEdge={highlightedMessage}
               setHighlightedEdge={setHighlightedMessage}
+              onClickHandler={handleSVGClick}
+              selectedSVG={selectedSVG}
             />
 
             {highlightedTask !== null && <SlidersAM highlightNode={highlightedTask} graph={applicationModel} setGraph={setApplicationModel} />}
@@ -319,10 +372,11 @@ function App() {
               setHighlightedNode={setHighlightedNodePM}
               highlightedEdge={highlightedEdgePM}
               setHighlightedEdge={setHighlightedEdgePM}
+              onClickHandler={handleSVGClick}
+              selectedSVG={selectedSVG}
             />
             {highlightedEdgePM && <SlidersPM highlightedEdge={highlightedEdgePM} graph={platformModel} setGraph={setPlatformModel} />}
           </div>
-
           {scheduleData &&
             <div className="schedule-data">
               <ScheduleVisualization schedules={scheduleData} />

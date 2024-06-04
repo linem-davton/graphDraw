@@ -4,10 +4,10 @@ import Stack from '@mui/material/Stack';
 
 
 function SlidersPM({ highlightedEdge, graph, setGraph }) {
-  if (!graph || !graph.links) {
+  const edge = graph?.links?.find(edge => edge.start_node == highlightedEdge.start_node && edge.end_node == highlightedEdge.end_node)
+  if (!edge) {
     return <div></div>;
   }
-  const edge = graph.links.find(edge => edge.start_node == highlightedEdge.start_node && edge.end_node == highlightedEdge.end_node)
   console.log("selected edge", edge);
   console.log("highlighted", highlightedEdge);
   console.log(graph);

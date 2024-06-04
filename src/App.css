@@ -6,15 +6,17 @@
   --sidebar-bg: #191b1b;
   --button-bg: #00b894 ;
   --button-hover-bg: #09856a;
-  --text-color: #dfe6e9 ;
+  --headline-color: #dfe6e9;
+  --text-color: #2f3640;
   --spinner-color: #00b894;
   --svg-border: #636e72;
   --svg-container: #353b48;
+  --svg-container-hover:#4b5161;
+  --svg-conatiner-active:#2f3640;
   --svg-circle-fill:#00b894;
   --svg-circle-selected:red; 
   --svg-cirlce-stroke: #dfe6e9;
   --svg-line-stroke: #dfe6e9;
-  --svg-rectangle-fill: #e67e22; /* Warm orange */
 }
 
 html, body {
@@ -22,7 +24,7 @@ html, body {
   padding: 0;
   height: 100%;
   width: 100%;
-  background: var(--main-bg);
+  background: var(--main-bg); /* Dark background color */
 }
 
 /* Styles for the app layout */
@@ -33,16 +35,23 @@ html, body {
 }
 
 .sidebar {
-  width: 20%;
+  width: 15%;
   background: var(--sidebar-bg);
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  min-height: 100vh; /* Full height of the viewport */
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: auto;
   align-items: stretch;
-  padding: 5px; /* Padding around the sidebar content */
+  padding: 10px; /* Padding around the sidebar content */
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
 }
 
 .main-content {
+  margin-left: 16%; /* Match the width of the sidebar */
   display: flex;
   flex-direction: row;
   align-items: flex-start;
@@ -55,27 +64,18 @@ html, body {
   height:100%; /* Full width of its container */
   justify-content: flex-start;
 }
-
-@media (max-width: 768px) {
-  .app-container{
-    flex-direction: column;
-  }
-  .main-content {
-    flex-direction: column;
-    justify-content: center;
-  }
-  .sidebar{
-    width:100%;
-    flex-direction:row;
-    overflow-x: auto;
-  }
-  .svg-container{
-    width:100%;
-    align-items: center;
-    justify-content:center;
-
-  }
+footer.navbar {
+  display: flex;
+  flex-direction: column;
+  margin: auto 20px 25px 20px;
 }
+footer.navbar .footer-link {
+  color: var(--text-color);
+  margin: 10px auto;
+  font-size: 1.5rem;
+}
+
+
 
 .schedule-data {
   margin: 30px;
@@ -93,7 +93,6 @@ html, body {
   transform: translateX(-50%);
   background: var(--button-bg);
   color: #2d3436; 
-  /*color:var(--text-color); */
   padding: 30px 30px;
   border-radius: 4px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
@@ -104,10 +103,11 @@ html, body {
 .button, .checkbox-label {
   background-color: var(--button-bg); /* Blue color for buttons */
   color: var(--text-color);
+  font-size: 1.2rem;
   padding: 20px; /* Increased padding for more height */
-  margin: 10px; /* Space between buttons */
+  margin: 15px  10px; /* Space between buttons */
   border: none;
-  border-radius: 4px;
+  border-radius: 30px;
   cursor: pointer;
   text-align: center;
   transition: background-color 0.3s ease;
@@ -130,7 +130,6 @@ html, body {
   vertical-align: middle; /* Align span text with the middle of the label */
 }
 
-
 /* Styles for the SVG container */
 
 .svg-container svg {
@@ -141,10 +140,17 @@ html, body {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Subtle shadow around SVG */
 }
 
-.svg-container svg circle,
-.svg-container svg line {
-  transition: all 0.3s ease;
+
+svg:hover {
+  border: 1px solid var(--button-hover-bg);
+  background: var(--svg-container-hover);
 }
+
+svg.active {
+  border: 4px solid var(--button-bg);
+  background: var(--svg-conatiner-active);
+}
+
 
 /* Style for nodes (circles) within the SVG */
 .svg-container svg circle {
@@ -152,25 +158,19 @@ html, body {
   stroke: var(--svg-cirlce-stroke); /* Stroke color */
   stroke-width: 1px; /* Stroke width */
 }
+svg circle:hover {
+  fill: var(--button-hover-bg);
+}
+
 
 .svg-container svg g circle.highlighted-circle {
-  fill: var(--svg-circle-selected); /* Red color for selected nodes */
-}
-.svg-container svg rect {
-  fill: var(--svg-rectangle-fill); /* Fill color for the nodes */
-  stroke: var(--svg-cirlce-stroke); /* Stroke color */
-  stroke-width: 1px; /* Stroke width */
-
-}
-
-.svg-container svg g rect.highlighted-rect {
   fill: var(--svg-circle-selected); /* Red color for selected nodes */
 }
 
 
 /* Style for text within the SVG */
 .svg-container svg text {
-  fill: var(--text-color); /* White color for better contrast */
+  fill: var(--headline-color); /* White color for better contrast */
   font-size: 5px; /* Adjust as needed */
 }
 
@@ -192,12 +192,58 @@ html, body {
 }
 /* Add more styles as per your preference */
 .sliders span {
-  color: var(--text-color);
+  color: var(--headline-color);
   margin-right: 10px;
 }
 
 h1, h2 {
-  color: var(--text-color);
+  color: var(--headline-color);
   text-align:center;
   margin-bottom: 20px;
+}
+h2{
+  font-size: 1.5rem;
+}
+h1{
+  font-size: 2.5rem;
+}
+
+@media (max-width: 768px) {
+  .app-container{
+    flex-direction: column;
+  }
+  .main-content {
+    flex-direction: column;
+    justify-content: center;
+    margin-top: 40%;
+    margin-left: 0;
+  }
+  .sidebar{
+    width:100%;
+    min-height:10%;
+    flex-direction:row;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+  .svg-container{
+    width:100%;
+    align-items: center;
+    justify-content:center;
+
+  }
+  footer.navbar {
+    margin: auto 10px;
+    flex-direction: row;
+    justify-content: center;
+  }
+  footer.navbar .footer-link {
+    margin: 0 10px;
+    font-size: 0.8rem;
+      
+  }
+  .button, .checkbox-label {
+    font-size: 1rem;
+    padding: 10px;
+    margin: 5px 15px;
+  }
 }

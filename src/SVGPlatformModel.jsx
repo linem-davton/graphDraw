@@ -3,19 +3,20 @@ import * as d3 from 'd3';
 import dagre from 'dagre';
 
 
-const SVGPlatformModel = ({ graph, setGraph, deleteMode, highlightNode, setHighlightedNode, highlightedEdge, setHighlightedEdge }) => {
+const SVGPlatformModel = ({ graph, setGraph, deleteMode, highlightNode, setHighlightedNode, highlightedEdge, setHighlightedEdge, onClickHandler, selectedSVG }) => {
   const svgRef = useRef();
   const nodeRadius = 5;
+  const svgClass = selectedSVG === "PlatformModel" ? 'active' : 'inactive';
 
   const legendData = [
     { type: 'Compute', color: '#00b894' },  // Assuming default fill is white
     { type: 'Router', color: '#e67e22' },   // Assuming default fill is black
-    { type: 'Sensor', color: 'blue' },
-    { type: 'Actuator', color: 'green' }
+    { type: 'Sensor', color: '#4393E9' },
+    { type: 'Actuator', color: '#F56C51' }
   ];
 
   const handleNodeClick = (nodeId) => {
-    if (deleteMode) {
+    if (deleteMode && selectedSVG === "PlatformModel") {
       const newNodes = graph.nodes.filter(node => node.id !== nodeId);
       const newEdges = graph.links.filter(edge => edge.start_node !== nodeId && edge.end_node !== nodeId);
       setGraph({ nodes: newNodes, links: newEdges });
@@ -30,7 +31,7 @@ const SVGPlatformModel = ({ graph, setGraph, deleteMode, highlightNode, setHighl
     }
   };
   function handleEdgeClick(edge) {
-    if (deleteMode) {
+    if (deleteMode && selectedSVG === "PlatformModel") {
       setGraph(prevGraph => {
         const newEdges = prevGraph.links.filter(e => !(e.start_node == edge.v && e.end_node == edge.w));
         return { nodes: prevGraph.nodes, links: newEdges };
@@ -90,7 +91,7 @@ const SVGPlatformModel = ({ graph, setGraph, deleteMode, highlightNode, setHighl
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove(); // Clear previous render
 
-    if (!graph || graph.nodes.length === 0) {
+    if (!graph || !graph.nodes.length) {
       return; // Exit if data is empty or improperly structured
     }
     // Create a new directed graph
@@ -154,12 +155,12 @@ const SVGPlatformModel = ({ graph, setGraph, deleteMode, highlightNode, setHighl
         case 'sensor':
           node.append('circle') // Using ellipse to represent sensors
             .attr('r', nodeRadius)
-            .style('fill', 'blue'); // Example color
+            .style('fill', '#4393E9'); // Example color
           break;
         case 'actuator':
           node.append('circle') // Using polygon to represent actuators
             .attr('r', nodeRadius)
-            .style('fill', 'green'); // Example color
+            .style('fill', '#F56C51'); // Example color
           break;
       }
     });
@@ -207,33 +208,34 @@ const SVGPlatformModel = ({ graph, setGraph, deleteMode, highlightNode, setHighl
 
     const legend = svg.append('g')
       .attr('class', 'legend')
-      .attr('transform', `translate(${g.graph().width - 12}, ${g.graph().height - 38})`);  // Adjust for your SVG size
+      .attr('transform', `translate(${0}, ${g.graph().height - g.graph().height / 20})`);  // Adjust for your SVG size
 
     legend.selectAll('.legend-item')
       .data(legendData)
       .enter()
       .append('g')
       .attr('class', 'legend-item')
-      .attr('transform', (d, i) => `translate(0, ${i * 10})`)  // Stacks items vertically, adjust spacing as needed
+      .attr('transform', (d, i) => `translate(${i * g.graph().width / 4},0)`)  // Stacks items vertically, adjust spacing as needed
       .each(function(d) {
         const item = d3.select(this);
         item.append('rect')  // Color block
-          .attr('width', nodeRadius)
-          .attr('height', nodeRadius)
-          .style('fill', d.color);
+          .attr('width', g.graph().width / 40)
+          .attr('height', g.graph().height / 40)
+          .style('fill', d.color)
 
         item.append('text')  // Text label
-          .attr('x', 10)  // Offset text to the right of the rectangle
-          .attr('y', 4)  // Vertical alignment
+          .attr('x', g.graph().width / 25)  // Offset text to the right of the rectangle
+          .attr('y', g.graph().height / 40)  // Vertical alignment
           .text(d.type)
-          .style("text-anchor", "start");
+          .style("text-anchor", "start")
+          .style("font-size", `${g.graph().width / 25}px`);  // Adjust font size as needed
       });
 
 
   }, [graph, deleteMode, highlightNode, highlightedEdge]);
 
   return (
-    <svg ref={svgRef} width="1800" height="1600" style={{ border: '1px solid black' }}>
+    <svg ref={svgRef} width="1800" height="1600" className={svgClass} onClick={() => onClickHandler("PlatformModel")}>
       {/* ... SVG content */}
     </svg>
   );

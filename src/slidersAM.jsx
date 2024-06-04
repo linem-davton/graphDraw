@@ -10,10 +10,8 @@ function SlidersAM({ highlightNode, graph, setGraph }) {
   }
 
   const highlightedNode = graph.tasks.find(node => node.id === highlightNode)
-  console.log('highlightNode', highlightNode);
 
   const handleSliderChange = (slider, newValue) => {
-    console.log(slider, newValue);
     // Update the graph state immutably
     setGraph(prevGraph => {
       // Map over nodes to find the node to update

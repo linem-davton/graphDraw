@@ -3,12 +3,13 @@ import * as d3 from 'd3';
 import dagre from 'dagre';
 
 
-const SVGApplicationModel = ({ graph, setGraph, deleteMode, highlightNode, setHighlightedNode, highlightedEdge, setHighlightedEdge }) => {
+const SVGApplicationModel = ({ graph, setGraph, deleteMode, highlightNode, setHighlightedNode, highlightedEdge, setHighlightedEdge, onClickHandler, selectedSVG }) => {
   const svgRef = useRef();
   const nodeRadius = 5;
+  const svgClass = selectedSVG === "ApplicationModel" ? 'active' : 'inactive';
 
   const handleNodeClick = (nodeId) => {
-    if (deleteMode) {
+    if (deleteMode && selectedSVG === "ApplicationModel") {
       const newTasks = graph.tasks.filter(node => node.id !== nodeId);
       const newMessages = graph.messages.filter(edge => edge.sender !== nodeId && edge.receiver !== nodeId);
       if (nodeId === highlightNode) {
@@ -20,7 +21,7 @@ const SVGApplicationModel = ({ graph, setGraph, deleteMode, highlightNode, setHi
     }
   };
   const handleEdgeClick = (edge) => {
-    if (deleteMode) {
+    if (deleteMode && selectedSVG === "ApplicationModel") {
       setGraph(prevGraph => {
         const newMessages = prevGraph.messages.filter(e => !(e.sender == edge.v && e.receiver == edge.w));
         return { tasks: prevGraph.tasks, messages: newMessages };
@@ -50,11 +51,9 @@ const SVGApplicationModel = ({ graph, setGraph, deleteMode, highlightNode, setHi
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove(); // Clear previous render
 
-    if (!graph || !graph.tasks || !graph.messages) {
+    if (!graph || !graph.tasks.length) {
       return; // Exit if data is empty or improperly structured
     }
-
-    console.log(graph);
     // Create a new directed graph
     var g = new dagre.graphlib.Graph();
     g.setGraph({
@@ -136,8 +135,7 @@ const SVGApplicationModel = ({ graph, setGraph, deleteMode, highlightNode, setHi
   }, [graph, deleteMode, highlightNode, highlightedEdge]);
 
   return (
-    <svg ref={svgRef} width="1800" height="1600" style={{ border: '1px solid black' }}>
-      {/* ... SVG content */}
+    <svg ref={svgRef} width="1800" height="1600" className={svgClass} onClick={() => onClickHandler("ApplicationModel")}>
     </svg>
   );
 };
