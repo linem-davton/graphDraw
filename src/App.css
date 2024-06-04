@@ -11,8 +11,8 @@
   --spinner-color: #00b894;
   --svg-border: #636e72;
   --svg-container: #353b48;
-  --svg-container-hover:#4b5161;
-  --svg-conatiner-active:#2f3640;
+  --svg-container-hover:#2f3640;
+  --svg-conatiner-active:#4b5161;
   --svg-circle-fill:#00b894;
   --svg-circle-selected:red; 
   --svg-cirlce-stroke: #dfe6e9;
@@ -76,7 +76,6 @@ footer.navbar .footer-link {
 }
 
 
-
 .schedule-data {
   margin: 30px;
   display: flex;
@@ -118,6 +117,7 @@ footer.navbar .footer-link {
 .checkbox-label:hover {
   background-color:var(--button-hover-bg); /* Darker blue on hover */
 }
+
 .checkbox-label input[type="checkbox"] {
   display: none; /* Hide the actual checkbox */
 }
@@ -125,9 +125,10 @@ footer.navbar .footer-link {
   text-decoration: line-through; /* Example style to show the checkbox is active */
 }
 
-.checkbox-label span {
-  text-align: center;
-  vertical-align: middle; /* Align span text with the middle of the label */
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Styles for the SVG container */
@@ -173,6 +174,9 @@ svg circle:hover {
   fill: var(--headline-color); /* White color for better contrast */
   font-size: 5px; /* Adjust as needed */
 }
+.svg-container svg text:hover {
+  fill: var(--button-bg);
+}
 
 /* Style for edges (lines) within the SVG */
 .svg-container svg line {
@@ -182,6 +186,10 @@ svg circle:hover {
 .svg-container svg line.highlighted-edge {
   stroke: red;
 }
+.svg-container svg line:hover {
+  stroke: var(--button-bg);
+}
+
 
 .sliders {
   display: flex;
@@ -204,26 +212,31 @@ h1, h2 {
 h2{
   font-size: 1.5rem;
 }
+h2.active {
+  font-size: 1.8rem;
+  color: var(--button-bg);
+}
+
 h1{
   font-size: 2.5rem;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 700px) {
   .app-container{
     flex-direction: column;
   }
   .main-content {
     flex-direction: column;
     justify-content: center;
-    margin-top: 40%;
-    margin-left: 0;
+    margin: 0 0;
   }
   .sidebar{
-    width:100%;
-    min-height:10%;
+    position: static;
+    width: 100%;
+    height: auto;
+    min-height: auto;
     flex-direction:row;
     overflow-x: auto;
-    overflow-y: hidden;
   }
   .svg-container{
     width:100%;
@@ -245,5 +258,9 @@ h1{
     font-size: 1rem;
     padding: 10px;
     margin: 5px 15px;
+    flex:1;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    box-sizing: border-box;
   }
 }

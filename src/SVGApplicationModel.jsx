@@ -3,7 +3,7 @@ import * as d3 from 'd3';
 import dagre from 'dagre';
 
 
-const SVGApplicationModel = ({ graph, setGraph, deleteMode, highlightNode, setHighlightedNode, highlightedEdge, setHighlightedEdge, onClickHandler, selectedSVG }) => {
+const SVGApplicationModel = ({ graph, setGraph, deleteMode, highlightNode, setHighlightedNode, highlightedEdge, setHighlightedEdge, selectedSVG }) => {
   const svgRef = useRef();
   const nodeRadius = 5;
   const svgClass = selectedSVG === "ApplicationModel" ? 'active' : 'inactive';
@@ -135,7 +135,7 @@ const SVGApplicationModel = ({ graph, setGraph, deleteMode, highlightNode, setHi
   }, [graph, deleteMode, highlightNode, highlightedEdge]);
 
   return (
-    <svg ref={svgRef} width="1800" height="1600" className={svgClass} onClick={() => onClickHandler("ApplicationModel")}>
+    <svg ref={svgRef} width="900" height="800" className={svgClass}>
     </svg>
   );
 };

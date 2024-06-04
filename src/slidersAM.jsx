@@ -5,7 +5,7 @@ import Stack from '@mui/material/Stack';
 
 
 function SlidersAM({ highlightNode, graph, setGraph }) {
-  if (!graph || !graph.tasks) {
+  if (!graph || !graph.tasks.length) {
     return (<div></div>);
   }
 

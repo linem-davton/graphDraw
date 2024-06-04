@@ -9,10 +9,8 @@ import SlidersAM from './slidersAM';
 import SlidersPM from './slidersPM';
 import ScheduleVisualization from './ScheduleVisualization';
 import Typography from '@mui/material/Typography';
-import Container from '@mui/material/Container';
 import Link from '@mui/material/Link';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import Tooltip from '@mui/material/Tooltip';
 import examplejson from './example1.json';
 import schema from './input_schema.json';
 
@@ -37,6 +35,8 @@ const theme = createTheme({
 
 const nodeTypes = ['compute', 'router', 'sensor', 'actuator'];
 const link_delay = 10;
+const bandwidth = 10;
+const link_type = "ethernet";
 const message_size = 20;
 const message_injection_time = 0;
 const wcet = 10;
@@ -61,9 +61,11 @@ function App() {
   const [selectedSVG, setSelectedSVG] = useState(null);
 
   const [highlightedTask, setHighlightedTask] = useState(null);
+  const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
   const [highlightedMessage, setHighlightedMessage] = useState(null);
   const [highlightNodePM, setHighlightedNodePM] = useState(null);
   const [highlightedEdgePM, setHighlightedEdgePM] = useState(null);
+  const [currentEdgeIndex, setCurrentEdgeIndex] = useState(0);
   const fileInputRef = useRef(null);
   const [savedData, setSavedData] = useState(null);
 
@@ -81,6 +83,7 @@ function App() {
     };
     saveToLocalStorage('model', dataToSave);
     setSavedData(dataToSave);
+    alert('model saved successfully');
   };
 
   const handleSavedLoad = () => {
@@ -97,36 +100,47 @@ function App() {
 
 
   const addTasks = () => {
-    const taskId = applicationModel.tasks.length
-    if (!isNaN(wcet) && !isNaN(mcet) && !isNaN(deadline)) {
-      setApplicationModel(prevGraph => ({
+    setApplicationModel(prevGraph => {
+      setHighlightedTask(prevGraph.tasks.length + 1);
+      return {
         ...prevGraph,
-        tasks: [...prevGraph.tasks, { id: taskId, wcet: wcet, mcet: mcet, deadline: deadline }]
-      }));
-
-    }
+        tasks: [...prevGraph.tasks, { id: prevGraph.tasks.length + 1, wcet: wcet, mcet: mcet, deadline: deadline }]
+      }
+    })
   };
 
   const addMessages = () => {
-    const msgId = applicationModel.messages.length;
     const sender = parseInt(prompt('Enter sender task:'));
-    const receiver = parseInt(prompt('Enter receiver task:'));
-    const sourceNodeExists = applicationModel.tasks.some(node => node.id === sender)
-    const targetNodeExists = applicationModel.tasks.some(node => node.id === receiver);
-
-    if (sourceNodeExists && targetNodeExists) {
-      const size = message_size;
-      const message = { id: msgId, sender: sender, receiver: receiver, size: size, message_injection_time: message_injection_time }
-
-      if (!isNaN(size)) {
-        setApplicationModel(prevGraph => ({
-          ...prevGraph,
-          messages: [...prevGraph.messages, message]
-        }));
-      }
-    } else {
-      alert('One or both tasks do not exist');
+    const sourceNode = applicationModel.tasks.find(node => node.id === sender);
+    if (!sourceNode) {
+      alert(`Task ${sender} does not exist`);
+      console.log('Task does not exist', applicationModel.tasks)
+      return;
     }
+
+    const receiver = parseInt(prompt('Enter receiver task:'));
+    const targetNode = applicationModel.tasks.find(node => node.id === receiver);
+    if (!targetNode) {
+      alert(`Task ${receiver} does not exist`);
+      return;
+    }
+    if (sender === receiver) {
+      alert('Sender and receiver cannot be the same');
+      return;
+    }
+    const message_exists = applicationModel.messages.some(edge => edge.sender === sender && edge.receiver === receiver);
+    if (message_exists) {
+      alert('Dependency already exists');
+      return;
+    }
+
+    const msgId = applicationModel.messages.length;
+    const message = { id: msgId, sender: sender, receiver: receiver, size: message_size, message_injection_time: message_injection_time }
+
+    setApplicationModel(prevGraph => ({
+      ...prevGraph,
+      messages: [...prevGraph.messages, message]
+    }));
   };
 
   const addNodes = () => {
@@ -142,24 +156,43 @@ function App() {
     }));
   };
   const addLinks = () => {
-    const linkId = platformModel.links.length;
     const sender = parseInt(prompt('Enter start node:'));
-    const receiver = parseInt(prompt('Enter receiver node:'));
-    const sourceNodeExists = platformModel.nodes.some(node => node.id === sender)
-    const targetNodeExists = platformModel.nodes.some(node => node.id === receiver);
-
-    if (sourceNodeExists && targetNodeExists) {
-      const link = { id: linkId, start_node: sender, end_node: receiver, link_delay: link_delay }
-
-      if (!isNaN(link_delay)) {
-        setPlatformModel(prevGraph => ({
-          ...prevGraph,
-          links: [...prevGraph.links, link]
-        }));
-      }
-    } else {
-      alert('One or both nodes do not exist');
+    const sourceNode = platformModel.nodes.find(node => node.id === sender)
+    if (!sourceNode) {
+      alert('Node does not exist');
+      return;
     }
+
+    const receiver = parseInt(prompt('Enter receiver node:'));
+    const targetNode = platformModel.nodes.find(node => node.id === receiver);
+    if (!targetNode) {
+      alert('Node does not exist');
+      return;
+    }
+    if (sender === receiver) {
+      alert('Start node and End node cannot be the same');
+      return;
+    }
+    if (sourceNode.type !== 'router' && targetNode.type !== 'router') {
+      alert('One node must be a router');
+      return;
+    }
+    const link_exists = platformModel.links.some(edge => edge.start_node === sender && edge.end_node === receiver);
+    if (link_exists) {
+      alert('Link already exists');
+      return;
+    }
+
+    // Add the link
+    const linkId = platformModel.links.length;
+    const link = { id: linkId, start_node: sender, end_node: receiver, link_delay: link_delay, bandwidth: bandwidth, type: link_type }
+    if (!isNaN(link_delay)) {
+      setPlatformModel(prevGraph => ({
+        ...prevGraph,
+        links: [...prevGraph.links, link]
+      }));
+    }
+    setHighlightedEdgePM({ start_node: sender, end_node: receiver });
 
   };
 
@@ -281,13 +314,81 @@ function App() {
   };
 
   const handleSVGClick = (svg) => {
-    if (deleteMode) return;
     if (svg === "ApplicationModel")
       setSelectedSVG(prev => prev === "ApplicationModel" ? null : "ApplicationModel");
     else
       setSelectedSVG(prev => prev === "PlatformModel" ? null : "PlatformModel");
   };
 
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      // Define the key combinations for the shortcuts
+      if (event.ctrlKey && event.key === 's') {
+        event.preventDefault();
+        downloadJsonFile();
+      }
+      else if (event.ctrlKey && event.key === 'o') {
+        event.preventDefault();
+        handleFileUpload();
+      }
+      else if (event.key === 'Tab') {
+        event.preventDefault();
+        setSelectedSVG(prev => prev === "ApplicationModel" ? "PlatformModel" : "ApplicationModel");
+      }
+      else if (event.key === '1') {
+        if (selectedSVG === "ApplicationModel") {
+          console.log("adding tasks", selectedSVG);
+          addTasks()
+        }
+        else if (selectedSVG === "PlatformModel") {
+          addNodes()
+        }
+      }
+      else if (event.key === '2') {
+        if (selectedSVG === "ApplicationModel") {
+          addMessages()
+        }
+        else if (selectedSVG === "PlatformModel") {
+          addLinks()
+        }
+      }
+      else if (event.key === 'Delete' || event.key === 'Backspace' || event.key === 'd') {
+        setDeleteMode(prev => !prev);
+      }
+      else if (event.ctrlKey && event.key === 'S') {
+        handleSave();
+
+      }
+      else if (event.key === 'w') {
+        if (selectedSVG === "ApplicationModel") {
+          setCurrentTaskIndex((prevIndex) => {
+            setHighlightedTask(applicationModel.tasks[(prevIndex + 1) % applicationModel.tasks.length]?.id);
+            return applicationModel.tasks.length ? (prevIndex + 1) % applicationModel.tasks.length : 0;
+          });
+        }
+        else if (selectedSVG === "PlatformModel") {
+          setCurrentEdgeIndex((prevIndex) => {
+            setHighlightedEdgePM(prevLink => {
+              const link = platformModel.links[(prevIndex + 1) % platformModel.links.length];
+              return { start_node: link.start_node, end_node: link.end_node }
+            });
+
+            return platformModel.links.length ? (prevIndex + 1) % platformModel.links.length : 0;
+          });
+        }
+      };
+
+    }
+
+    // Add event listener for keydown events
+    window.addEventListener('keydown', handleKeyDown);
+
+    // Cleanup event listener on component unmount
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [selectedSVG]);
   return (
     <ThemeProvider theme={theme}>
       <div className="app-container">
@@ -297,25 +398,27 @@ function App() {
           {selectedSVG === "ApplicationModel" &&
             <>
               <button className="button" onClick={addTasks}>Add Task</button>
-              <button className="button" onClick={addMessages}>Add Task Dependency</button>
+              {applicationModel.tasks.length > 1 &&
+                <button className="button" onClick={addMessages}>Add Task Dependency</button>
+              }
             </>
           }
           {selectedSVG === "PlatformModel" &&
             <>
               <button className="button" onClick={addNodes}>Add Node</button>
-              <button className="button" onClick={addLinks}>Add Link</button>
+              {platformModel.nodes.length > 1 &&
+                <button className="button" onClick={addLinks}>Add Link</button>
+              }
             </>
           }
-          {((applicationModel.tasks.length && selectedSVG === "ApplicationModel") || (platformModel.nodes.length && selectedSVG === "PlatformModel")) &&
+          {(applicationModel.tasks.length || platformModel.nodes.length) && selectedSVG !== null &&
             <>
-              <Tooltip title="Enable this mode to delete nodes and edges by clicking on them.">
-                <label className="checkbox-label">
-                  <input type="checkbox" id="deleteMode" checked={deleteMode} onChange={() => {
-                    setDeleteMode(prev => !prev);
-                  }} />
-                  <span>Delete Mode</span>
-                </label>
-              </Tooltip>
+              <label className="checkbox-label">
+                <input type="checkbox" id="deleteMode" checked={deleteMode} onChange={() => {
+                  setDeleteMode(prev => !prev);
+                }} />
+                <span>Delete Mode</span>
+              </label>
             </>
           }
           {selectedSVG === null &&
@@ -349,32 +452,35 @@ function App() {
 
         <div className="main-content">
           <div className="svg-container">
-            <h2>Application Model</h2>
-            <SVGApplicationModel
-              graph={applicationModel}
-              setGraph={setApplicationModel}
-              deleteMode={deleteMode}
-              highlightNode={highlightedTask}
-              setHighlightedNode={setHighlightedTask}
-              highlightedEdge={highlightedMessage}
-              setHighlightedEdge={setHighlightedMessage}
-              onClickHandler={handleSVGClick}
-              selectedSVG={selectedSVG}
-            />
-
+            <div className="ApplicationMode" onClick={() => handleSVGClick("ApplicationModel")}>
+              <h2 className={selectedSVG === "ApplicationModel" ? "active" : "inactive"}>Application Model</h2>
+              <SVGApplicationModel
+                graph={applicationModel}
+                setGraph={setApplicationModel}
+                deleteMode={deleteMode}
+                highlightNode={highlightedTask}
+                setHighlightedNode={setHighlightedTask}
+                highlightedEdge={highlightedMessage}
+                setHighlightedEdge={setHighlightedMessage}
+                selectedSVG={selectedSVG}
+              />
+            </div>
             {highlightedTask !== null && <SlidersAM highlightNode={highlightedTask} graph={applicationModel} setGraph={setApplicationModel} />}
-            <h2>Platform Model</h2>
-            <SVGPlatformModel
-              graph={platformModel}
-              setGraph={setPlatformModel}
-              deleteMode={deleteMode}
-              highlightNode={highlightNodePM}
-              setHighlightedNode={setHighlightedNodePM}
-              highlightedEdge={highlightedEdgePM}
-              setHighlightedEdge={setHighlightedEdgePM}
-              onClickHandler={handleSVGClick}
-              selectedSVG={selectedSVG}
-            />
+
+            <div className="PlatformModel" onClick={() => handleSVGClick("PlatformModel")}>
+
+              <h2 className={selectedSVG === "PlatformModel" ? "active" : "inactive"}>Platform Model</h2>
+              <SVGPlatformModel
+                graph={platformModel}
+                setGraph={setPlatformModel}
+                deleteMode={deleteMode}
+                highlightNode={highlightNodePM}
+                setHighlightedNode={setHighlightedNodePM}
+                highlightedEdge={highlightedEdgePM}
+                setHighlightedEdge={setHighlightedEdgePM}
+                selectedSVG={selectedSVG}
+              />
+            </div>
             {highlightedEdgePM && <SlidersPM highlightedEdge={highlightedEdgePM} graph={platformModel} setGraph={setPlatformModel} />}
           </div>
           {scheduleData &&
@@ -384,12 +490,14 @@ function App() {
         </div>
 
       </div >
-      {errorMessage &&
+      {
+        errorMessage &&
         <div className="error-message">
           {errorMessage}
-        </div>}
+        </div>
+      }
 
-    </ThemeProvider>
+    </ThemeProvider >
 
   );
 }

@@ -8,9 +8,6 @@ function SlidersPM({ highlightedEdge, graph, setGraph }) {
   if (!edge) {
     return <div></div>;
   }
-  console.log("selected edge", edge);
-  console.log("highlighted", highlightedEdge);
-  console.log(graph);
 
   const handleSliderChange = (slider, newValue) => {
     // Update the graph state immutably
@@ -20,7 +17,6 @@ function SlidersPM({ highlightedEdge, graph, setGraph }) {
         // Check if the current edge is the one to update
         if (edge_.id === edge.id) {
           // Update the specific property based on the slider
-          console.log("updated Edge", { ...edge_, [slider]: newValue });
           return { ...edge_, [slider]: newValue };
         }
         return edge_; // Return other edges unmodified

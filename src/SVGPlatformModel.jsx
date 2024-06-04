@@ -3,7 +3,7 @@ import * as d3 from 'd3';
 import dagre from 'dagre';
 
 
-const SVGPlatformModel = ({ graph, setGraph, deleteMode, highlightNode, setHighlightedNode, highlightedEdge, setHighlightedEdge, onClickHandler, selectedSVG }) => {
+const SVGPlatformModel = ({ graph, setGraph, deleteMode, highlightNode, setHighlightedNode, highlightedEdge, setHighlightedEdge, selectedSVG }) => {
   const svgRef = useRef();
   const nodeRadius = 5;
   const svgClass = selectedSVG === "PlatformModel" ? 'active' : 'inactive';
@@ -153,7 +153,7 @@ const SVGPlatformModel = ({ graph, setGraph, deleteMode, highlightNode, setHighl
             .style("fill", '#e67e22')
           break;
         case 'sensor':
-          node.append('circle') // Using ellipse to represent sensors
+          node.append('circle') // Using ellipse to r  epresent sensors
             .attr('r', nodeRadius)
             .style('fill', '#4393E9'); // Example color
           break;
@@ -183,6 +183,8 @@ const SVGPlatformModel = ({ graph, setGraph, deleteMode, highlightNode, setHighl
 
     // Adding lines
     edges.append('line')
+      .classed("highlighted-edge", d => { return highlightedEdge?.start_node == d.v && highlightedEdge?.end_node == d.w; })
+
       .attr('x1', d => calculateBoundaryPoint(g.node(d.v), g.node(d.w)).x)
       .attr('y1', d => calculateBoundaryPoint(g.node(d.v), g.node(d.w)).y)
       .attr('x2', d => calculateBoundaryPoint(g.node(d.w), g.node(d.v)).x)
@@ -235,7 +237,7 @@ const SVGPlatformModel = ({ graph, setGraph, deleteMode, highlightNode, setHighl
   }, [graph, deleteMode, highlightNode, highlightedEdge]);
 
   return (
-    <svg ref={svgRef} width="1800" height="1600" className={svgClass} onClick={() => onClickHandler("PlatformModel")}>
+    <svg ref={svgRef} width="900" height="800" className={svgClass} >
       {/* ... SVG content */}
     </svg>
   );
