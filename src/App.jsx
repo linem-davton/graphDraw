@@ -45,6 +45,8 @@ const deadline = 500;
 
 const saveToLocalStorage = (key, data) => {
   localStorage.setItem(key, JSON.stringify(data));
+  alert('model saved successfully');
+
 };
 
 const loadFromLocalStorage = (key) => {
@@ -83,7 +85,6 @@ function App() {
     };
     saveToLocalStorage('model', dataToSave);
     setSavedData(dataToSave);
-    alert('model saved successfully');
   };
 
   const handleSavedLoad = () => {
@@ -241,7 +242,7 @@ function App() {
   }, [applicationModel, platformModel])
 
   const downloadJsonFile = () => {
-    if (!applicationModel.tasks.length && !platformModel.nodes.length) {
+    if (!applicationModel.tasks && platformModel.nodes) {
       setErrorMessage('No JSON data to download');
       return;
     }
