@@ -13,6 +13,9 @@ import Link from '@mui/material/Link';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import examplejson from './example1.json';
 import schema from './input_schema.json';
+import scheduleSchema from './ScheduleSchema.json'
+import { saveToLocalStorage, loadFromLocalStorage } from './utility';
+import { generateRandomAM, generateRandomPM } from './randomModels';
 
 
 const theme = createTheme({
@@ -43,16 +46,7 @@ const wcet = 10;
 const mcet = 5;
 const deadline = 500;
 
-const saveToLocalStorage = (key, data) => {
-  localStorage.setItem(key, JSON.stringify(data));
-  alert('model saved successfully');
 
-};
-
-const loadFromLocalStorage = (key) => {
-  const data = localStorage.getItem(key);
-  return data ? JSON.parse(data) : null;
-};
 
 function App() {
   const [applicationModel, setApplicationModel] = useState({ tasks: [], messages: [] })
@@ -62,6 +56,10 @@ function App() {
   const [errorMessage, setErrorMessage] = useState('');
   const [selectedSVG, setSelectedSVG] = useState(null);
 
+  const selectedSVGRef = useRef(selectedSVG);
+  const applicationModelRef = useRef(applicationModel);
+  const platformModelRef = useRef(platformModel);
+
   const [highlightedTask, setHighlightedTask] = useState(null);
   const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
   const [highlightedMessage, setHighlightedMessage] = useState(null);
@@ -70,6 +68,19 @@ function App() {
   const [currentEdgeIndex, setCurrentEdgeIndex] = useState(0);
   const fileInputRef = useRef(null);
   const [savedData, setSavedData] = useState(null);
+
+  useEffect(() => {
+    selectedSVGRef.current = selectedSVG;
+  }, [selectedSVG]);
+
+  useEffect(() => {
+    applicationModelRef.current = applicationModel;
+  }, [applicationModel]);
+
+  useEffect(() => {
+    platformModelRef.current = platformModel;
+  }, [platformModel])
+
 
   useEffect(() => {
     const data = loadFromLocalStorage('model');
@@ -111,8 +122,9 @@ function App() {
   };
 
   const addMessages = () => {
+    const currentApplicationModel = applicationModelRef.current;
     const sender = parseInt(prompt('Enter sender task:'));
-    const sourceNode = applicationModel.tasks.find(node => node.id === sender);
+    const sourceNode = currentApplicationModel.tasks.find(node => node.id === sender);
     if (!sourceNode) {
       alert(`Task ${sender} does not exist`);
       console.log('Task does not exist', applicationModel.tasks)
@@ -120,7 +132,7 @@ function App() {
     }
 
     const receiver = parseInt(prompt('Enter receiver task:'));
-    const targetNode = applicationModel.tasks.find(node => node.id === receiver);
+    const targetNode = currentApplicationModel.tasks.find(node => node.id === receiver);
     if (!targetNode) {
       alert(`Task ${receiver} does not exist`);
       return;
@@ -129,13 +141,13 @@ function App() {
       alert('Sender and receiver cannot be the same');
       return;
     }
-    const message_exists = applicationModel.messages.some(edge => edge.sender === sender && edge.receiver === receiver);
+    const message_exists = currentApplicationModel.messages.some(edge => edge.sender === sender && edge.receiver === receiver);
     if (message_exists) {
       alert('Dependency already exists');
       return;
     }
 
-    const msgId = applicationModel.messages.length;
+    const msgId = currentApplicationModel.messages.length;
     const message = { id: msgId, sender: sender, receiver: receiver, size: message_size, message_injection_time: message_injection_time }
 
     setApplicationModel(prevGraph => ({
@@ -145,7 +157,10 @@ function App() {
   };
 
   const addNodes = () => {
-    const nodeId = platformModel.nodes.length;
+    const currentPlatformModel = platformModelRef.current;
+
+
+    const nodeId = currentPlatformModel.nodes.length;
     const type = parseInt(prompt('Enter node type: 0-compute, 1-router, 2-sensor, 3-actuator'));
     if (isNaN(type) || type < 0 || type > 3) {
       alert('Invalid node type');
@@ -157,15 +172,16 @@ function App() {
     }));
   };
   const addLinks = () => {
+    const currentPlatformModel = platformModelRef.current;
     const sender = parseInt(prompt('Enter start node:'));
-    const sourceNode = platformModel.nodes.find(node => node.id === sender)
+    const sourceNode = currentPlatformModel.nodes.find(node => node.id === sender)
     if (!sourceNode) {
       alert('Node does not exist');
       return;
     }
 
     const receiver = parseInt(prompt('Enter receiver node:'));
-    const targetNode = platformModel.nodes.find(node => node.id === receiver);
+    const targetNode = currentPlatformModel.nodes.find(node => node.id === receiver);
     if (!targetNode) {
       alert('Node does not exist');
       return;
@@ -178,14 +194,14 @@ function App() {
       alert('One node must be a router');
       return;
     }
-    const link_exists = platformModel.links.some(edge => edge.start_node === sender && edge.end_node === receiver);
+    const link_exists = currentPlatformModel.links.some(edge => edge.start_node === sender && edge.end_node === receiver);
     if (link_exists) {
       alert('Link already exists');
       return;
     }
 
     // Add the link
-    const linkId = platformModel.links.length;
+    const linkId = currentPlatformModel.links.length;
     const link = { id: linkId, start_node: sender, end_node: receiver, link_delay: link_delay, bandwidth: bandwidth, type: link_type }
     if (!isNaN(link_delay)) {
       setPlatformModel(prevGraph => ({
@@ -242,13 +258,13 @@ function App() {
   }, [applicationModel, platformModel])
 
   const downloadJsonFile = () => {
-    if (!applicationModel.tasks && platformModel.nodes) {
-      setErrorMessage('No JSON data to download');
-      return;
-    }
+    const currentApplicationModel = applicationModelRef.current;
+    const currentPlatformModel = platformModelRef.current;
+
+
     const combinedJsonData = {
-      application: applicationModel,
-      platform: platformModel
+      application: currentApplicationModel,
+      platform: currentPlatformModel
     };
 
     // Convert the combined JSON data to a string
@@ -321,9 +337,39 @@ function App() {
       setSelectedSVG(prev => prev === "PlatformModel" ? null : "PlatformModel");
   };
 
+  const handleGenerateRandom = () => {
+
+    if (selectedSVG === "ApplicationModel") {
+      const nodes = parseInt(prompt('Enter number of tasks'));
+
+      if (nodes <= 0 || isNaN(nodes)) {
+        alert("Enter Positive Integer Value");
+        return;
+      }
+      setApplicationModel(generateRandomAM(nodes));
+    }
+    if (selectedSVG === "PlatformModel") {
+      const compute = parseInt(prompt('Enter number of compute nodes'));
+      const routers = parseInt(prompt('Enter number of routers'));
+      const sensors = parseInt(prompt('Enter number of sensors'));
+      const actuators = parseInt(prompt('Enter number of actuators'));
+      if (compute <= 0 || routers <= 0 || sensors <= 0 || actuators <= 0 || isNaN(compute) || isNaN(routers) || isNaN(sensors) || isNaN(actuators)) {
+        alert("Enter Positive Integer Value");
+        return;
+      }
+      setPlatformModel(generateRandomPM(compute, routers, sensors, actuators));
+    }
+
+  };
+
 
   useEffect(() => {
     const handleKeyDown = (event) => {
+
+      // Access the latest state using refs
+      const currentSelectedSVG = selectedSVGRef.current;
+      const currentApplicationModel = applicationModelRef.current;
+      const currentPlatformModel = platformModelRef.current;
       // Define the key combinations for the shortcuts
       if (event.ctrlKey && event.key === 's') {
         event.preventDefault();
@@ -338,19 +384,20 @@ function App() {
         setSelectedSVG(prev => prev === "ApplicationModel" ? "PlatformModel" : "ApplicationModel");
       }
       else if (event.key === '1') {
-        if (selectedSVG === "ApplicationModel") {
-          console.log("adding tasks", selectedSVG);
+        console.log('1 pressed');
+        if (currentSelectedSVG === "ApplicationModel") {
+          console.log('Adding tasks');
           addTasks()
         }
-        else if (selectedSVG === "PlatformModel") {
+        else if (currentSelectedSVG === "PlatformModel") {
           addNodes()
         }
       }
       else if (event.key === '2') {
-        if (selectedSVG === "ApplicationModel") {
+        if (currentSelectedSVG === "ApplicationModel") {
           addMessages()
         }
-        else if (selectedSVG === "PlatformModel") {
+        else if (currentSelectedSVG === "PlatformModel") {
           addLinks()
         }
       }
@@ -362,20 +409,20 @@ function App() {
 
       }
       else if (event.key === 'w') {
-        if (selectedSVG === "ApplicationModel") {
+        if (currentSelectedSVG === "ApplicationModel") {
           setCurrentTaskIndex((prevIndex) => {
-            setHighlightedTask(applicationModel.tasks[(prevIndex + 1) % applicationModel.tasks.length]?.id);
-            return applicationModel.tasks.length ? (prevIndex + 1) % applicationModel.tasks.length : 0;
+            setHighlightedTask(currentApplicationModel.tasks[(prevIndex + 1) % currentApplicationModel.tasks.length]?.id);
+            return currentApplicationModel.tasks.length ? (prevIndex + 1) % currentApplicationModel.tasks.length : 0;
           });
         }
-        else if (selectedSVG === "PlatformModel") {
+        else if (currentSelectedSVG === "PlatformModel") {
           setCurrentEdgeIndex((prevIndex) => {
             setHighlightedEdgePM(prevLink => {
-              const link = platformModel.links[(prevIndex + 1) % platformModel.links.length];
+              const link = currentPlatformModel.links[(prevIndex + 1) % currentPlatformModel.links.length];
               return { start_node: link.start_node, end_node: link.end_node }
             });
 
-            return platformModel.links.length ? (prevIndex + 1) % platformModel.links.length : 0;
+            return currentPlatformModel.links.length ? (prevIndex + 1) % currentPlatformModel.links.length : 0;
           });
         }
       };
@@ -389,7 +436,8 @@ function App() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [selectedSVG]);
+  }, []);
+
   return (
     <ThemeProvider theme={theme}>
       <div className="app-container">
@@ -402,6 +450,7 @@ function App() {
               {applicationModel.tasks.length > 1 &&
                 <button className="button" onClick={addMessages}>Add Task Dependency</button>
               }
+              <button className="button" onClick={handleGenerateRandom}>Generate Random Model</button>
             </>
           }
           {selectedSVG === "PlatformModel" &&
@@ -410,6 +459,7 @@ function App() {
               {platformModel.nodes.length > 1 &&
                 <button className="button" onClick={addLinks}>Add Link</button>
               }
+              <button className="button" onClick={handleGenerateRandom}>Generate Random Model</button>
             </>
           }
           {(applicationModel.tasks.length || platformModel.nodes.length) && selectedSVG !== null &&

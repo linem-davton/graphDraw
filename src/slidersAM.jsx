@@ -5,11 +5,11 @@ import Stack from '@mui/material/Stack';
 
 
 function SlidersAM({ highlightNode, graph, setGraph }) {
-  if (!graph || !graph.tasks.length) {
+  const highlightedNode = graph.tasks.find(node => node.id === highlightNode)
+  if (!graph || !highlightNode) {
     return (<div></div>);
   }
 
-  const highlightedNode = graph.tasks.find(node => node.id === highlightNode)
 
   const handleSliderChange = (slider, newValue) => {
     // Update the graph state immutably
