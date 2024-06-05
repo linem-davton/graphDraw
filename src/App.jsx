@@ -90,9 +90,11 @@ function App() {
   }, []);
 
   const handleSave = () => {
+    const currentApplicationModel = applicationModelRef.current;
+    const currentPlatformModel = platformModelRef.current;
     const dataToSave = {
-      application: applicationModel,
-      platform: platformModel
+      application: currentApplicationModel,
+      platform: currentPlatformModel
     };
     saveToLocalStorage('model', dataToSave);
     setSavedData(dataToSave);
