@@ -59,6 +59,8 @@ function App() {
   const selectedSVGRef = useRef(selectedSVG);
   const applicationModelRef = useRef(applicationModel);
   const platformModelRef = useRef(platformModel);
+  const applicationModelSVGRef = useRef();
+  const platformModelSVGRef = useRef();
 
   const [highlightedTask, setHighlightedTask] = useState(null);
   const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
@@ -71,6 +73,15 @@ function App() {
 
   useEffect(() => {
     selectedSVGRef.current = selectedSVG;
+    console.log('selectedSVG:', applicationModelSVGRef);
+    console.log('platformModel', platformModelSVGRef);
+    if (selectedSVGRef === "ApplicationModel" && applicationModelSVGRef.current) {
+      console.log('scrolling to application model');
+      applicationModelSVGRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else if (selectedSVGRef === "PlatformModel" && platformModelSVGRef.current) {
+      console.log('scrolling to platform model');
+      platformModelSVGRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
   }, [selectedSVG]);
 
   useEffect(() => {
@@ -446,25 +457,25 @@ function App() {
         <div className="sidebar">
           <h1>Distributed Scheduling</h1>
 
-          {selectedSVG === "ApplicationModel" &&
+          {(selectedSVG === "ApplicationModel") && (
             <>
               <button className="button" onClick={addTasks}>Add Task</button>
               {applicationModel.tasks.length > 1 &&
                 <button className="button" onClick={addMessages}>Add Task Dependency</button>
               }
               <button className="button" onClick={handleGenerateRandom}>Generate Random Model</button>
-            </>
+            </>)
           }
-          {selectedSVG === "PlatformModel" &&
+          {(selectedSVG === "PlatformModel") && (
             <>
               <button className="button" onClick={addNodes}>Add Node</button>
               {platformModel.nodes.length > 1 &&
                 <button className="button" onClick={addLinks}>Add Link</button>
               }
               <button className="button" onClick={handleGenerateRandom}>Generate Random Model</button>
-            </>
+            </>)
           }
-          {(applicationModel.tasks.length || platformModel.nodes.length) && selectedSVG !== null &&
+          {((applicationModel.tasks.length > 0 || platformModel.nodes.length > 0) && selectedSVG !== null) && (
             <>
               <label className="checkbox-label">
                 <input type="checkbox" id="deleteMode" checked={deleteMode} onChange={() => {
@@ -472,22 +483,23 @@ function App() {
                 }} />
                 <span>Delete Mode</span>
               </label>
-            </>
+            </>)
           }
-          {selectedSVG === null &&
+          {selectedSVG === null && (
             <>
               <input type="file" accept=".json" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileChange} />
               <button className="button" onClick={handleFileUpload}>Upload JSON</button>
               <button className="button" onClick={loadDefaultJSON}>Load Default JSON</button>
               {savedData && <button className="button" onClick={handleSavedLoad}>Load Last Saved</button>}
-            </>
+            </>)
           }
-          {(applicationModel.tasks.length || platformModel.nodes.length) &&
+          {(applicationModel.tasks.length > 0 || platformModel.nodes.length > 0) && (
             <>
               <button className="button" onClick={downloadJsonFile}>Download JSON</button>
 
               <button className="button" onClick={handleSave}>Save Locally</button>
-            </>}
+            </>)
+          }
 
           <footer className="navbar">
             <Typography variant="body1" align="center" className="footer-link">
@@ -505,7 +517,7 @@ function App() {
 
         <div className="main-content">
           <div className="svg-container">
-            <div className="ApplicationMode" onClick={() => handleSVGClick("ApplicationModel")}>
+            <div className="ApplicationMode" ref={applicationModelSVGRef} onClick={() => handleSVGClick("ApplicationModel")}>
               <h2 className={selectedSVG === "ApplicationModel" ? "active" : "inactive"}>Application Model</h2>
               <SVGApplicationModel
                 graph={applicationModel}
@@ -520,7 +532,7 @@ function App() {
             </div>
             {highlightedTask !== null && <SlidersAM highlightNode={highlightedTask} graph={applicationModel} setGraph={setApplicationModel} />}
 
-            <div className="PlatformModel" onClick={() => handleSVGClick("PlatformModel")}>
+            <div className="PlatformModel" ref={platformModelSVGRef} onClick={() => handleSVGClick("PlatformModel")}>
 
               <h2 className={selectedSVG === "PlatformModel" ? "active" : "inactive"}>Platform Model</h2>
               <SVGPlatformModel
