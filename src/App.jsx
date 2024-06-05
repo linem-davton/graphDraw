@@ -73,12 +73,13 @@ function App() {
 
   useEffect(() => {
     selectedSVGRef.current = selectedSVG;
-    console.log('selectedSVG:', applicationModelSVGRef);
-    console.log('platformModel', platformModelSVGRef);
-    if (selectedSVGRef === "ApplicationModel" && applicationModelSVGRef.current) {
+    console.log('selectedSVG:', selectedSVG);
+    console.log('applicationModelSVGRef:', applicationModelSVGRef);
+    console.log('platformModelSVGRef:', platformModelSVGRef);
+    if (selectedSVG === "ApplicationModel" && applicationModelSVGRef.current) {
       console.log('scrolling to application model');
       applicationModelSVGRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    } else if (selectedSVGRef === "PlatformModel" && platformModelSVGRef.current) {
+    } else if (selectedSVG === "PlatformModel" && platformModelSVGRef.current) {
       console.log('scrolling to platform model');
       platformModelSVGRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
@@ -432,7 +433,7 @@ function App() {
           setCurrentEdgeIndex((prevIndex) => {
             setHighlightedEdgePM(prevLink => {
               const link = currentPlatformModel.links[(prevIndex + 1) % currentPlatformModel.links.length];
-              return { start_node: link.start_node, end_node: link.end_node }
+              return { start_node: link?.start_node, end_node: link?.end_node }
             });
 
             return currentPlatformModel.links.length ? (prevIndex + 1) % currentPlatformModel.links.length : 0;
@@ -463,7 +464,7 @@ function App() {
               {applicationModel.tasks.length > 1 &&
                 <button className="button" onClick={addMessages}>Add Task Dependency</button>
               }
-              <button className="button" onClick={handleGenerateRandom}>Generate Random Model</button>
+              <button className="button" onClick={handleGenerateRandom}>Generate AM</button>
             </>)
           }
           {(selectedSVG === "PlatformModel") && (
@@ -472,7 +473,7 @@ function App() {
               {platformModel.nodes.length > 1 &&
                 <button className="button" onClick={addLinks}>Add Link</button>
               }
-              <button className="button" onClick={handleGenerateRandom}>Generate Random Model</button>
+              <button className="button" onClick={handleGenerateRandom}>Generate PM</button>
             </>)
           }
           {((applicationModel.tasks.length > 0 || platformModel.nodes.length > 0) && selectedSVG !== null) && (
