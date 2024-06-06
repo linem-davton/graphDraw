@@ -53,6 +53,7 @@ html, body {
 .main-content {
   margin-left: 16%; /* Match the width of the sidebar */
   display: flex;
+  flex: 1;
   flex-direction: row;
   align-items: flex-start;
   justify-content: flex-start;
@@ -60,7 +61,7 @@ html, body {
 }
 
 .svg-container {
-  width: 50%;
+  flex: 1;
   height:100%; /* Full width of its container */
   justify-content: flex-start;
 }
@@ -79,8 +80,9 @@ footer.navbar .footer-link {
 .schedule-data {
   margin: 30px;
   display: flex;
+  position: sticky;
+  top: 0;
   flex-direction: column;
-  width: 50%;
   height:100%; /* Full width of its container */
 }
 

@@ -6,7 +6,7 @@ import Stack from '@mui/material/Stack';
 
 function SlidersAM({ highlightNode, graph, setGraph }) {
   const highlightedNode = graph.tasks.find(node => node.id === highlightNode)
-  if (!graph || highlightNode == null) {
+  if (!graph || highlightNode == null || highlightedNode == undefined) {
     return (<div></div>);
   }
 

@@ -98,10 +98,10 @@ const SVGPlatformModel = ({ graph, setGraph, deleteMode, highlightNode, setHighl
     var g = new dagre.graphlib.Graph();
     g.setGraph({
       rankdir: 'LR', // or 'LR' for horizontal layout
-      nodesep: 2, // Reduce distance between nodes
+      nodesep: 1, // Reduce distance between nodes
       edgesep: 5, // Reduce distance between edges
       ranksep: 10, // Reduce distance between different ranks
-      marginx: 10, // Increase margin if needed
+      marginx: 2, // Increase margin if needed
       marginy: 10
     });
     g.setDefaultEdgeLabel(() => ({}));
