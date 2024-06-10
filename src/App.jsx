@@ -63,24 +63,19 @@ function App() {
   const platformModelSVGRef = useRef();
 
   const [highlightedTask, setHighlightedTask] = useState(null);
-  const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
+  const highlightedTaskRef = useRef(highlightedTask);
   const [highlightedMessage, setHighlightedMessage] = useState(null);
   const [highlightNodePM, setHighlightedNodePM] = useState(null);
   const [highlightedEdgePM, setHighlightedEdgePM] = useState(null);
-  const [currentEdgeIndex, setCurrentEdgeIndex] = useState(0);
+  const highlightedEdgePMRef = useRef(highlightedEdgePM);
   const fileInputRef = useRef(null);
   const [savedData, setSavedData] = useState(null);
 
   useEffect(() => {
     selectedSVGRef.current = selectedSVG;
-    console.log('selectedSVG:', selectedSVG);
-    console.log('applicationModelSVGRef:', applicationModelSVGRef);
-    console.log('platformModelSVGRef:', platformModelSVGRef);
     if (selectedSVG === "ApplicationModel" && applicationModelSVGRef.current) {
-      console.log('scrolling to application model');
       applicationModelSVGRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
     } else if (selectedSVG === "PlatformModel" && platformModelSVGRef.current) {
-      console.log('scrolling to platform model');
       platformModelSVGRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   }, [selectedSVG]);
@@ -93,6 +88,13 @@ function App() {
     platformModelRef.current = platformModel;
   }, [platformModel])
 
+  useEffect(() => {
+    highlightedTaskRef.current = highlightedTask;
+  }, [highlightedTask]);
+
+  useEffect(() => {
+    highlightedEdgePMRef.current = highlightedEdgePM;
+  }, [highlightedEdgePM]);
 
   useEffect(() => {
     const data = loadFromLocalStorage('model');
@@ -384,6 +386,11 @@ function App() {
       const currentSelectedSVG = selectedSVGRef.current;
       const currentApplicationModel = applicationModelRef.current;
       const currentPlatformModel = platformModelRef.current;
+      const currentHighlightedTask = highlightedTaskRef.current;
+      const currentHighlightedEdgePM = highlightedEdgePMRef.current;
+      const currentTaskIndex = currentApplicationModel.tasks.findIndex(node => node.id === currentHighlightedTask);
+      const currentLinkIndex = currentPlatformModel.links.findIndex(link => link.start_node === currentHighlightedEdgePM?.start_node && link.end_node === currentHighlightedEdgePM?.end_node);
+
       // Define the key combinations for the shortcuts
       if (event.ctrlKey && event.key === 's') {
         event.preventDefault();
@@ -416,7 +423,20 @@ function App() {
         }
       }
       else if (event.key === 'Delete' || event.key === 'Backspace' || event.key === 'd') {
-        setDeleteMode(prev => !prev);
+        if (currentSelectedSVG === "ApplicationModel") {
+          const newTasks = currentApplicationModel.tasks.filter(node => node.id !== currentHighlightedTask);
+          const newMessages = currentApplicationModel.messages.filter(edge => edge.sender !== currentHighlightedTask && edge.receiver !== currentHighlightedTask);
+          setApplicationModel(prev => {
+            setHighlightedTask(currentTaskIndex === newTasks.length ? newTasks[newTasks.length - 1]?.id : newTasks[currentTaskIndex]?.id);
+            return { tasks: newTasks, messages: newMessages };
+          });
+        }
+        else if (currentSelectedSVG === "PlatformModel") {
+          setPlatformModel(prevGraph => {
+            const newEdges = prevGraph.links.filter(e => !(e.start_node == currentHighlightedEdgePM.start_node && e.end_node == currentHighlightedEdgePM.end_node));
+            return { nodes: prevGraph.nodes, links: newEdges };
+          });
+        }
       }
       else if (event.ctrlKey && event.key === 'S') {
         handleSave();
@@ -424,20 +444,14 @@ function App() {
       }
       else if (event.key === 'w') {
         if (currentSelectedSVG === "ApplicationModel") {
-          setCurrentTaskIndex((prevIndex) => {
-            setHighlightedTask(currentApplicationModel.tasks[(prevIndex + 1) % currentApplicationModel.tasks.length]?.id);
-            return currentApplicationModel.tasks.length ? (prevIndex + 1) % currentApplicationModel.tasks.length : 0;
-          });
+          setHighlightedTask(currentApplicationModel.tasks[(currentTaskIndex + 1) % currentApplicationModel.tasks.length]?.id);
         }
         else if (currentSelectedSVG === "PlatformModel") {
-          setCurrentEdgeIndex((prevIndex) => {
-            setHighlightedEdgePM(prevLink => {
-              const link = currentPlatformModel.links[(prevIndex + 1) % currentPlatformModel.links.length];
-              return { start_node: link?.start_node, end_node: link?.end_node }
-            });
-
-            return currentPlatformModel.links.length ? (prevIndex + 1) % currentPlatformModel.links.length : 0;
+          setHighlightedEdgePM(prevLink => {
+            const link = currentPlatformModel.links[(currentLinkIndex + 1) % currentPlatformModel.links.length];
+            return { start_node: link?.start_node, end_node: link?.end_node }
           });
+
         }
       };
 

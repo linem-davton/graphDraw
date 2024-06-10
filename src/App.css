@@ -169,11 +169,38 @@ svg.active {
 }
 svg circle:hover {
   fill: var(--button-hover-bg);
+  stroke: #00695c; /* Darker teal for stroke */
 }
 
 
-.svg-container svg g circle.highlighted-circle {
+.svg-container svg circle.highlighted-circle {
   fill: var(--svg-circle-selected); /* Red color for selected nodes */
+}
+
+.svg-container svg circle.router {
+  fill: #e67e22; /* Blue color for selected nodes */
+}
+
+.svg-container svg circle.router:hover {
+  fill: #cc6600; /* Blue color for selected nodes */
+  stroke: #8B4513;
+}
+
+.svg-container svg circle.sensor {
+  fill: #4393E9; /* Blue color for selected nodes */
+}
+.svg-container svg circle.sensor:hover {
+    fill: #2980b9; /* Darker blue for hover */
+  stroke: #1a5276; /* Navy blue for stroke */
+ }
+
+.svg-container svg circle.actuator {
+  fill: #F56C51; /* Red color for selected nodes */
+}
+
+.svg-container svg circle.actuator:hover {
+ fill: #e74c3c; /* Brighter red for hover */
+  stroke: #8B0000; /* Dark red for stroke */
 }
 
 

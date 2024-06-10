@@ -146,21 +146,22 @@ const SVGPlatformModel = ({ graph, setGraph, deleteMode, highlightNode, setHighl
         case 'compute':
           node.append('circle')
             .attr('r', nodeRadius)
+            .classed('compute', true)
           break;
         case 'router':
           node.append('circle')
             .attr('r', nodeRadius)
-            .style("fill", '#e67e22')
+            .classed('router', true)
           break;
         case 'sensor':
           node.append('circle') // Using ellipse to r  epresent sensors
             .attr('r', nodeRadius)
-            .style('fill', '#4393E9'); // Example color
+            .classed('sensor', true)
           break;
         case 'actuator':
           node.append('circle') // Using polygon to represent actuators
             .attr('r', nodeRadius)
-            .style('fill', '#F56C51'); // Example color
+            .classed('actuator', true)
           break;
       }
     });
