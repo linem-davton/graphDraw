@@ -456,7 +456,7 @@ function App() {
     <ThemeProvider theme={theme}>
       <div className="app-container">
         <div className="sidebar">
-          <h1>Distributed Scheduling</h1>
+          <a href='https://github.com/linem-davton/graphdraw-frontend' target="_blank"><h1>Distributed Scheduling</h1></a>
 
           {(selectedSVG === "ApplicationModel") && (
             <>

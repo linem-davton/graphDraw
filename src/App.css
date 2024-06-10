@@ -52,6 +52,7 @@ html, body {
 
 .main-content {
   margin-left: 16%; /* Match the width of the sidebar */
+  flex:1;
   display: flex;
   flex: 1;
   flex-direction: row;
@@ -63,7 +64,6 @@ html, body {
 .svg-container {
   flex: 1;
   height:100%; /* Full width of its container */
-  justify-content: flex-start;
 }
 footer.navbar {
   display: flex;
@@ -71,19 +71,19 @@ footer.navbar {
   margin: auto 20px 25px 20px;
 }
 footer.navbar .footer-link {
-  color: var(--text-color);
   margin: 10px auto;
   font-size: 1.5rem;
 }
 
 
 .schedule-data {
-  margin: 30px;
+  margin: 0 20px;
+  position: sticky;
+  top: 0;
   display: flex;
   position: sticky;
   top: 0;
   flex-direction: column;
-  height:100%; /* Full width of its container */
 }
 
 /* Error Messages */
@@ -111,13 +111,15 @@ footer.navbar .footer-link {
   border-radius: 30px;
   cursor: pointer;
   text-align: center;
-  transition: background-color 0.3s ease;
+  transition: all 1 ease-in-out;
   display: block; 
 }
 
 .button:hover,
 .checkbox-label:hover {
   background-color:var(--button-hover-bg); /* Darker blue on hover */
+  color: var(--headline-color);
+  transform: scale(1.05);
 }
 
 .checkbox-label input[type="checkbox"] {
@@ -132,6 +134,10 @@ footer.navbar .footer-link {
   align-items: center;
   justify-content: center;
 }
+a {
+   text-decoration: none;
+}
+
 
 /* Styles for the SVG container */
 
@@ -210,6 +216,7 @@ h1, h2 {
   color: var(--headline-color);
   text-align:center;
   margin-bottom: 20px;
+  transition: all 1 ease-in-out;
 }
 h2{
   font-size: 1.5rem;
@@ -221,6 +228,10 @@ h2.active {
 
 h1{
   font-size: 2.5rem;
+}
+h1:hover {
+  color: var(--button-hover-bg);
+  font-size:2.55rem;
 }
 
 @media (max-width: 700px) {
