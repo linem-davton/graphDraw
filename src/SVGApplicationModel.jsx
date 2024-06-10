@@ -54,6 +54,9 @@ const SVGApplicationModel = ({ graph, setGraph, deleteMode, highlightNode, setHi
     if (!graph || !graph.tasks.length) {
       return; // Exit if data is empty or improperly structured
     }
+
+    // Top level group for zooming and panning
+    const svgGroup = svg.append('g');
     // Create a new directed graph
     var g = new dagre.graphlib.Graph();
     g.setGraph({
@@ -82,8 +85,21 @@ const SVGApplicationModel = ({ graph, setGraph, deleteMode, highlightNode, setHi
     dagre.layout(g);
     svg.attr('viewBox', `0 0 ${g.graph().width} ${g.graph().height}`); // Adjust width and height based on Dagre output
 
+
+    // Add zoom functionality
+    const zoom = d3.zoom()
+      .scaleExtent([1, 5 * graph.tasks.length])
+      .on('zoom', (event) => {
+        svgGroup.attr('transform', event.transform);
+      });
+
+    if (selectedSVG === "ApplicationModel") {
+      svg.call(zoom); // Apply the zoom behavior only if selectedSVG is 'ApplicationModel'
+    } else {
+      svg.on(".zoom", null); // Remove zoom behavior if not 'ApplicationModel'
+    }
     // Render nodes
-    const nodes = svg.selectAll('.node')
+    const nodes = svgGroup.selectAll('.node')
       .data(g.nodes().map(nodeId => g.node(nodeId)), d => d.label)
       .enter()
       .append('g')
@@ -106,7 +122,7 @@ const SVGApplicationModel = ({ graph, setGraph, deleteMode, highlightNode, setHi
       .style("fill", "white")
       .text(d => d.label); // Assuming each node has a "name" property
 
-    svg.selectAll('.edge')
+    svgGroup.selectAll('.edge')
       .data(g.edges())
       .enter()
       .append('line')
@@ -118,7 +134,7 @@ const SVGApplicationModel = ({ graph, setGraph, deleteMode, highlightNode, setHi
       .attr('marker-end', 'url(#arrowhead)')
       .on("click", function(event, edge) { handleEdgeClick(edge); })
 
-    svg.append('defs').append('marker')
+    svgGroup.append('defs').append('marker')
       .attr('id', 'arrowhead')
       .attr('viewBox', '-0 -5 10 10')
       .attr('refX', 5)
@@ -132,7 +148,7 @@ const SVGApplicationModel = ({ graph, setGraph, deleteMode, highlightNode, setHi
       .attr('fill', '#999')
       .style('stroke', 'none');
 
-  }, [graph, deleteMode, highlightNode, highlightedEdge]);
+  }, [graph, deleteMode, highlightNode, highlightedEdge, selectedSVG]);
 
   return (
     <svg ref={svgRef} width="900" height="800" className={svgClass}>

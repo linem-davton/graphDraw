@@ -94,6 +94,9 @@ const SVGPlatformModel = ({ graph, setGraph, deleteMode, highlightNode, setHighl
     if (!graph || !graph.nodes.length) {
       return; // Exit if data is empty or improperly structured
     }
+    // Top level group for zooming and panning
+    const svgGroup = svg.append('g');
+
     // Create a new directed graph
     var g = new dagre.graphlib.Graph();
     g.setGraph({
@@ -129,8 +132,22 @@ const SVGPlatformModel = ({ graph, setGraph, deleteMode, highlightNode, setHighl
     dagre.layout(g);
     svg.attr('viewBox', `0 0 ${g.graph().width} ${g.graph().height}`); // Adjust width and height based on Dagre output
 
+    // Add zoom functionality
+    const zoom = d3.zoom()
+      .scaleExtent([1, 5 * graph.nodes.length])
+      .on('zoom', (event) => {
+        svgGroup.attr('transform', event.transform);
+      });
+
+    if (selectedSVG === "PlatformModel") {
+      svg.call(zoom); // Apply the zoom behavior only if selectedSVG is 'PlatformModel'
+    } else {
+      svg.on(".zoom", null); // Remove zoom behavior if not 'PlatformModel'
+    }
+
+
     // Render nodes
-    const nodes = svg.selectAll('.node')
+    const nodes = svgGroup.selectAll('.node')
       .data(g.nodes().map(nodeId => g.node(nodeId)), d => d.label)
       .enter()
       .append('g')
@@ -173,7 +190,7 @@ const SVGPlatformModel = ({ graph, setGraph, deleteMode, highlightNode, setHighl
       .style("fill", "white")
       .text(d => d.label); // Assuming each node has a "name" property
 
-    const edges = svg.selectAll('.edge')
+    const edges = svgGroup.selectAll('.edge')
       .data(g.edges())
       .enter()
       .append('g')
@@ -235,7 +252,7 @@ const SVGPlatformModel = ({ graph, setGraph, deleteMode, highlightNode, setHighl
       });
 
 
-  }, [graph, deleteMode, highlightNode, highlightedEdge]);
+  }, [graph, deleteMode, highlightNode, highlightedEdge, selectedSVG]);
 
   return (
     <svg ref={svgRef} width="900" height="800" className={svgClass} >
