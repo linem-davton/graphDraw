@@ -3,7 +3,7 @@ import * as d3 from 'd3';
 
 const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
-const Test1 = ({ schedules }) => {
+const Test1 = ({ schedules, setErrorMessage }) => {
   const graphWidth = 600;
   const graphHeight = 300;
 
@@ -20,9 +20,18 @@ const Test1 = ({ schedules }) => {
         const g = svg.append('g')
           .attr('transform', `translate(${margin.left}, ${margin.top})`);
 
+        const algorithmName = schedules[scheduleKey].name;
         const nodes = Array.from(new Set(schedules[scheduleKey].schedule.map(job => job.node_id)));
         const endTime = d3.max(schedules[scheduleKey].schedule.map(job => job.end_time));
         const start_time = d3.min(schedules[scheduleKey].schedule.map(job => job.start_time)); // Calculate the minimum start_time
+        // set the error messages for missed deadlines
+
+        if (schedules[scheduleKey].missed_deadlines?.length > 0) {
+          setErrorMessage(prev => [...prev,
+          `${algorithmName}: ${schedules[scheduleKey].missed_deadlines.join(',')} Missed Deadline`
+          ]);
+        }
+
         const xScale = d3.scaleLinear()
           .domain([start_time, endTime]) // Adjust the domain to include start_time
           .range([0, width]);
@@ -61,7 +70,7 @@ const Test1 = ({ schedules }) => {
 
         // Algorithm name
         const algorithmNames = ['LDF', 'EDF', 'LL', 'LDF Multi-Node', 'EDF Multi-Node'];
-        const algorithmName = algorithmNames[index];
+        // const algorithmName = algorithmNames[index];
 
         g.append('text')
           .attr('x', width / 2)

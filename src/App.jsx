@@ -53,7 +53,7 @@ function App() {
   const [platformModel, setPlatformModel] = useState({ nodes: [], links: [] })
   const [deleteMode, setDeleteMode] = useState(false);
   const [scheduleData, setScheduleData] = useState(null);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState([]);
   const [selectedSVG, setSelectedSVG] = useState(null);
 
   const selectedSVGRef = useRef(selectedSVG);
@@ -254,13 +254,13 @@ function App() {
 
         if (!valid) {
           console.log('JSON Validation errors:', validate.errors);
-          setErrorMessage('JSON data does not match schema');
+          setErrorMessage(['JSON data does not match schema']);
         } else {
           setApplicationModel(parsedData.application);
           setPlatformModel(parsedData.platform);
         }
       } catch (error) {
-        setErrorMessage('Upload Valid JSON')
+        setErrorMessage(['Upload Valid JSON'])
         console.error('Error parsing JSON:', error);
       }
     };
@@ -309,8 +309,8 @@ function App() {
 
 
   const scheduleGraph = async () => {
-    if (!applicationModel || !platformModel) {
-      setErrorMessage('No jobs to schedule');
+    if (!applicationModel?.tasks?.length > 0 || !platformModel?.nodes?.length > 0) {
+      setErrorMessage(['No jobs to schedule']);
       return;
     }
     const request = {
@@ -336,12 +336,12 @@ function App() {
       const data = await response.json();
 
       setScheduleData(() => {
-        setErrorMessage('')
+        setErrorMessage([]);
         return data
       });
       console.log("Response from backend:", data);
     } catch (error) {
-      setErrorMessage(`Error Connecting to Server`);
+      setErrorMessage([`Error Connecting to Server`]);
       console.error("Error sending data to backend:", error);
     }
   };
@@ -567,15 +567,21 @@ function App() {
           </div>
           {scheduleData &&
             <div className="schedule-data">
-              <ScheduleVisualization schedules={scheduleData} />
+              <ScheduleVisualization schedules={scheduleData} setErrorMessage={setErrorMessage} />
             </div>}
         </div>
 
       </div >
       {
-        errorMessage &&
+        errorMessage.length > 0 &&
         <div className="error-message">
-          {errorMessage}
+          {errorMessage.map((error, index) => {
+            return (< React.Fragment key={index} >
+              {error}
+              < br />
+            </React.Fragment>);
+          })
+          }
         </div>
       }
 
