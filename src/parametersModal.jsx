@@ -44,7 +44,7 @@ export const ApplicationModal = ({ isOpen, onClose, onSubmit }) => {
             <span className='modal-field'>Min MCET</span>
             <input type="number" value={minMCET} onChange={e => setMinMCET(Math.abs(parseInt(e.target.value, 10)) || 0)} />
 
-            <span className='modal-field'>Min Deadline-WCET offset</span>
+            <span className='modal-field'>Deadline-WCET Offset</span>
             <input type="number" value={minDeadlineOffset} onChange={e => setMinDeadlineOffset(Math.abs(parseInt(e.target.value, 10)) || 0)} />
 
             <span className='modal-field'>Max Deadline</span>
