@@ -4,26 +4,18 @@ export const generateRandomAM = (N, maxWCET, minWCET, minMCET, minDeadlineOffset
   // generates random application model where the link probability drops as the distance between nodes increases
   const tasks = [];
   const messages = [];
-  // const maxWCET = 100;
-  // const minWCET = 1;
-  //  const minMCET = 1;
-  // const minDeadlineOffset = 10; // Minimum difference between WCET and deadline
-  //  const maxDeadline = 1000;
-  //  const linkProb = 0.5;
-  //  const maxMessageSize = 50;
 
-  // input validation
-  if (minMCET > minWCET || maxWCET < minWCET || maxDeadline < minDeadlineOffset + minWCET) {
-    console.error("Invalid input parameters");
-    alert("Invalid input parameters");
-    return { tasks, messages }
+  if (maxWCET < minWCET || minMCET > minWCET || maxDeadline < minDeadlineOffset + maxWCET || minDeadlineOffset < 0 || linkProb < 0 || linkProb > 1) {
+    alert('Invalid Application parameters');
+    console.error('Invalid Application parameters');
+    return { tasks, messages };
+
   }
-
   // Create N nodes
   for (let i = 0; i < N; i++) {
     const wcet = Math.floor(Math.random() * maxWCET) + minWCET;
-    const mcet = Math.floor(Math.random() * (wcet / 2)) + minMCET;
-    const deadline = Math.floor(Math.random() * maxDeadline) + wcet;
+    const mcet = Math.floor(Math.random() * (wcet)) + minMCET;
+    const deadline = Math.floor(Math.random() * maxDeadline) + minDeadlineOffset + wcet;
     tasks.push({ id: i, wcet: wcet, mcet: mcet, deadline: deadline });
   }
 
@@ -46,11 +38,13 @@ export const generateRandomPM = (compute, routers, sensors, actuators, maxLinkDe
 
   const nodes = [];
   const links = [];
-  //const linkProb = 0.5;
-  //const maxLinkDelay = 100;
-  // const minLinkDelay = 1;
-  // const maxBandwidth = 100;
-  // const minBandwidth = 1;
+
+  if (compute < 1 || routers < 1 || sensors < 1 || actuators < 1 || maxLinkDelay < minLinkDelay || maxBandwidth < minBandwidth) {
+    alert('Invalid Platform parameters');
+    console.error('Invalid Platform parameters');
+    return { nodes, links };
+  }
+
 
   const totalNodes = compute + routers + sensors + actuators;
   for (let i = 0; i < totalNodes; i++) {
