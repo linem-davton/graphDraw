@@ -113,7 +113,7 @@ This project is a React-based frontend designed to visualize task schedules alon
 
 2. **Clone the Repository**
   - Clone the forked repository to your local machine:
-  - backend: git clone https://github.com/linem-davton/graphdraw-frontend.git
+  - Clone Backend Repository: git clone https://github.com/linem-davton/es-lab-task2
 
 3. **Navigate to the Project Directory**
    - Change to the project directory:
