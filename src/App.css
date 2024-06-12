@@ -262,6 +262,50 @@ h1:hover {
   font-size:2.55rem;
 }
 
+.modal {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: var(--svg-container);
+  color: var(--headline-color);
+  font-size: 1.1rem;
+  padding: 20px;
+  border-radius: 20px;
+  width: 400px;
+}
+.modal-content h2{ 
+  text-align: center;
+  color: var(--button-bg);
+  margin-bottom: 20px;
+}
+.modal-content button{ 
+  display: block;
+  margin: 40px auto 10px auto;
+  padding: 10px 40px;
+}
+.modal-inputs{
+  display: grid;
+  grid-template-columns: 2fr 1fr; /* Creates a two-column layout */
+  grid-gap: 10px; /* Adds space between rows and columns */
+}
+.modal-field {
+  text-align: right;
+  padding-right: 10px;
+}
+.close {
+  float: right;
+  cursor: pointer;
+}
+
 @media (max-width: 1024px) {
   .sidebar {
     width: 25%;

@@ -1,17 +1,21 @@
 
-export const generateRandomAM = (N) => {
+export const generateRandomAM = (N, maxWCET, minWCET, minMCET, minDeadlineOffset, maxDeadline, linkProb, maxMessageSize) => {
+
+  // generates random application model where the link probability drops as the distance between nodes increases
   const tasks = [];
   const messages = [];
-  const maxWCET = 100;
-  const minWCET = 1;
-  const minMCET = 1;
-  const minDeadlineOffset = 10; // Minimum difference between WCET and deadline
-  const maxDeadline = 1000;
-  const linkProb = 0.5;
-  const maxMessageSize = 50;
+  // const maxWCET = 100;
+  // const minWCET = 1;
+  //  const minMCET = 1;
+  // const minDeadlineOffset = 10; // Minimum difference between WCET and deadline
+  //  const maxDeadline = 1000;
+  //  const linkProb = 0.5;
+  //  const maxMessageSize = 50;
 
   // input validation
   if (minMCET > minWCET || maxWCET < minWCET || maxDeadline < minDeadlineOffset + minWCET) {
+    console.error("Invalid input parameters");
+    alert("Invalid input parameters");
     return { tasks, messages }
   }
 
@@ -26,7 +30,7 @@ export const generateRandomAM = (N) => {
   // Create random edges ensuring no cycles
   for (let i = 0; i < N; i++) {
     for (let j = i + 1; j < N; j++) {
-      if (Math.random() > linkProb) {
+      if (Math.random() < linkProb / (1 * (j - i))) {
         const size = Math.floor(Math.random() * maxMessageSize) + 1;
         messages.push({ id: j - i, sender: i, receiver: j, size: size });
       }
@@ -36,15 +40,17 @@ export const generateRandomAM = (N) => {
   return { tasks, messages };
 };
 
-export const generateRandomPM = (compute, routers, sensors, actuators) => {
+export const generateRandomPM = (compute, routers, sensors, actuators, maxLinkDelay, minLinkDelay, maxBandwidth, minBandwidth) => {
+
+  // Generates PM with each non router node connected to exactly one router and each router connected to the next router with the last router connected to the first router
 
   const nodes = [];
   const links = [];
-  const linkProb = 0.5;
-  const maxLinkDelay = 100;
-  const minLinkDelay = 1;
-  const maxBandwidth = 100;
-  const minBandwidth = 1;
+  //const linkProb = 0.5;
+  //const maxLinkDelay = 100;
+  // const minLinkDelay = 1;
+  // const maxBandwidth = 100;
+  // const minBandwidth = 1;
 
   const totalNodes = compute + routers + sensors + actuators;
   for (let i = 0; i < totalNodes; i++) {
@@ -62,18 +68,19 @@ export const generateRandomPM = (compute, routers, sensors, actuators) => {
     }
   }
 
+  var end_node;
   for (let i = 0; i < totalNodes; i++) {
-    if (nodes[i].type === 'router') {
-      for (let j = 0; j < totalNodes; j++) {
-        if (i !== j && Math.random() > linkProb) {
-          const link_delay = Math.floor(Math.random() * maxLinkDelay) + minLinkDelay;
-          const bandwidth = Math.floor(Math.random() * maxBandwidth) + minBandwidth;
-          links.push({ id: j - i, start_node: i, end_node: j, link_delay: link_delay, bandwidth: bandwidth, type: 'ethernet' });
-        }
-      }
+    const link_delay = Math.floor(Math.random() * maxLinkDelay) + minLinkDelay;
+    const bandwidth = Math.floor(Math.random() * maxBandwidth) + minBandwidth;
+    if (nodes[i].type !== 'router') {
+      end_node = Math.floor(Math.random() * (routers - 1)) + compute;
     }
+    else {
+      end_node = i < compute + routers - 1 ? i + 1 : compute;
+    }
+
+    links.push({ id: i, start_node: i, end_node: end_node, link_delay: link_delay, bandwidth: bandwidth, type: 'ethernet' });
   }
-  console.log({ nodes, links });
 
   return { nodes, links };
 };

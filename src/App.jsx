@@ -16,6 +16,7 @@ import schema from './input_schema.json';
 import scheduleSchema from './ScheduleSchema.json'
 import { saveToLocalStorage, loadFromLocalStorage } from './utility';
 import { generateRandomAM, generateRandomPM } from './randomModels';
+import { ApplicationModal, PlatformModal } from './parametersModal';
 
 
 const theme = createTheme({
@@ -71,6 +72,38 @@ function App() {
   const fileInputRef = useRef(null);
   const [savedData, setSavedData] = useState(null);
 
+  const [applicationModalOpen, setApplicationModalOpen] = useState(false);
+  const [platformModalOpen, setPlatformModalOpen] = useState(false);
+  const applicationModalOpenRef = useRef(applicationModalOpen);
+  const platformModalOpenRef = useRef(platformModalOpen);
+
+  const handleApplicationOpenModal = () => {
+    setApplicationModalOpen(true);
+  };
+
+  const handleApplicationCloseModal = () => {
+    setApplicationModalOpen(false);
+  };
+
+  const handleApplicationModalFormSubmit = (params) => {
+    console.log('Parameters:', params);
+    setApplicationModel(generateRandomAM(params.N, params.maxWCET, params.minWCET, params.minMCET, params.minDeadlineOffset, params.maxDeadline, params.linkProb, params.maxMessageSize));
+    // Here you would call generateRandomAM with the params
+  };
+
+  const handlePlatformOpenModal = () => {
+    setPlatformModalOpen(true);
+  };
+
+  const handlePlatformCloseModal = () => {
+    setPlatformModalOpen(false);
+  };
+
+  const handlePlatformModalFormSubmit = (params) => {
+    console.log('Parameters:', params);
+    setPlatformModel(generateRandomPM(params.compute, params.routers, params.sensors, params.actuators, params.maxLinkDelay, params.minLinkDelay, params.maxBandwidth, params.minBandwidth));
+  };
+
   useEffect(() => {
     selectedSVGRef.current = selectedSVG;
     if (selectedSVG === "ApplicationModel" && applicationModelSVGRef.current) {
@@ -95,6 +128,13 @@ function App() {
   useEffect(() => {
     highlightedEdgePMRef.current = highlightedEdgePM;
   }, [highlightedEdgePM]);
+
+  useEffect(() => {
+    applicationModalOpenRef.current = applicationModalOpen;
+  }, [applicationModalOpen]);
+  useEffect(() => {
+    platformModalOpenRef.current = platformModalOpen;
+  }, [platformModalOpen]);
 
   useEffect(() => {
     const data = loadFromLocalStorage('model');
@@ -353,34 +393,14 @@ function App() {
       setSelectedSVG(prev => prev === "PlatformModel" ? null : "PlatformModel");
   };
 
-  const handleGenerateRandom = () => {
-
-    if (selectedSVG === "ApplicationModel") {
-      const nodes = parseInt(prompt('Enter number of tasks'));
-
-      if (nodes <= 0 || isNaN(nodes)) {
-        alert("Enter Positive Integer Value");
-        return;
-      }
-      setApplicationModel(generateRandomAM(nodes));
-    }
-    if (selectedSVG === "PlatformModel") {
-      const compute = parseInt(prompt('Enter number of compute nodes'));
-      const routers = parseInt(prompt('Enter number of routers'));
-      const sensors = parseInt(prompt('Enter number of sensors'));
-      const actuators = parseInt(prompt('Enter number of actuators'));
-      if (compute <= 0 || routers <= 0 || sensors <= 0 || actuators <= 0 || isNaN(compute) || isNaN(routers) || isNaN(sensors) || isNaN(actuators)) {
-        alert("Enter Positive Integer Value");
-        return;
-      }
-      setPlatformModel(generateRandomPM(compute, routers, sensors, actuators));
-    }
-
-  };
-
 
   useEffect(() => {
     const handleKeyDown = (event) => {
+
+      const currentApplicationModalOpen = applicationModalOpenRef.current;
+      const currentPlatformModalOpen = platformModalOpenRef.current;
+      // return if either of the modals are open
+      if (currentApplicationModalOpen || currentPlatformModalOpen) return;
 
       // Access the latest state using refs
       const currentSelectedSVG = selectedSVGRef.current;
@@ -390,6 +410,7 @@ function App() {
       const currentHighlightedEdgePM = highlightedEdgePMRef.current;
       const currentTaskIndex = currentApplicationModel.tasks.findIndex(node => node.id === currentHighlightedTask);
       const currentLinkIndex = currentPlatformModel.links.findIndex(link => link.start_node === currentHighlightedEdgePM?.start_node && link.end_node === currentHighlightedEdgePM?.end_node);
+
 
       // Define the key combinations for the shortcuts
       if (event.ctrlKey && event.key === 's') {
@@ -422,7 +443,7 @@ function App() {
           addLinks()
         }
       }
-      else if (event.key === 'Delete' || event.key === 'Backspace' || event.key === 'd') {
+      else if (event.key === 'Delete' || event.key === 'd') {
         if (currentSelectedSVG === "ApplicationModel") {
           const newTasks = currentApplicationModel.tasks.filter(node => node.id !== currentHighlightedTask);
           const newMessages = currentApplicationModel.messages.filter(edge => edge.sender !== currentHighlightedTask && edge.receiver !== currentHighlightedTask);
@@ -480,7 +501,7 @@ function App() {
               {applicationModel.tasks.length > 1 &&
                 <button className="button" onClick={addMessages}>Add Task Dependency</button>
               }
-              <button className="button" onClick={handleGenerateRandom}>Generate AM</button>
+              <button className="button" onClick={handleApplicationOpenModal}>Generate AM</button>
             </>)
           }
           {(selectedSVG === "PlatformModel") && (
@@ -489,7 +510,7 @@ function App() {
               {platformModel.nodes.length > 1 &&
                 <button className="button" onClick={addLinks}>Add Link</button>
               }
-              <button className="button" onClick={handleGenerateRandom}>Generate PM</button>
+              <button className="button" onClick={handlePlatformOpenModal}>Generate PM</button>
             </>)
           }
           {((applicationModel.tasks.length > 0 || platformModel.nodes.length > 0) && selectedSVG !== null) && (
@@ -584,6 +605,16 @@ function App() {
           }
         </div>
       }
+      <ApplicationModal
+        isOpen={applicationModalOpen}
+        onClose={handleApplicationCloseModal}
+        onSubmit={handleApplicationModalFormSubmit}
+      />
+      <PlatformModal
+        isOpen={platformModalOpen}
+        onClose={handlePlatformCloseModal}
+        onSubmit={handlePlatformModalFormSubmit}
+      />
 
     </ThemeProvider >
 
