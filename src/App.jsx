@@ -140,6 +140,8 @@ function App() {
     const data = loadFromLocalStorage('model');
     if (data) {
       setSavedData(data);
+      setApplicationModel(data.application);
+      setPlatformModel(data.platform);
     }
   }, []);
 

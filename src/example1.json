@@ -2,51 +2,72 @@
   "application": {
     "tasks": [
       {
-        "id": 0,
-        "wcet": 20,
-        "mcet": 10,
-        "deadline": 250
-      },
-      {
         "id": 1,
-        "wcet": 20,
-        "mcet": 10,
-        "deadline": 250
+        "wcet": 1,
+        "mcet": 1,
+        "deadline": 2
       },
       {
         "id": 2,
-        "wcet": 20,
-        "mcet": 10,
-        "deadline": 300
+        "wcet": 1,
+        "mcet": 1,
+        "deadline": 5
       },
       {
         "id": 3,
-        "wcet": 20,
-        "mcet": 10,
-        "deadline": 256
+        "wcet": 1,
+        "mcet": 1,
+        "deadline": 4
+      },
+      {
+        "id": 4,
+        "wcet": 1,
+        "mcet": 1,
+        "deadline": 3
+      },
+      {
+        "id": 5,
+        "wcet": 1,
+        "mcet": 1,
+        "deadline": 5
+      },
+      {
+        "id": 6,
+        "wcet": 1,
+        "mcet": 1,
+        "deadline": 6
       }
     ],
     "messages": [
       {
-        "id": 0,
-        "sender": 1,
-        "receiver": 0,
-        "size": 40,
-        "injection_time": 100
-      },
-      {
         "id": 1,
-        "sender": 2,
-        "receiver": 1,
-        "size": 40,
-        "injection_time": 105
+        "sender": 1,
+        "receiver": 2,
+        "size": 20
       },
       {
         "id": 2,
+        "sender": 1,
+        "receiver": 3,
+        "size": 20
+      },
+      {
+        "id": 3,
+        "sender": 2,
+        "receiver": 4,
+        "size": 20
+      },
+      {
+        "id": 4,
         "sender": 3,
-        "receiver": 1,
-        "size": 40,
-        "injection_time": 50
+        "receiver": 6,
+        "size": 20
+      },
+      {
+        "id": 5,
+        "sender": 2,
+        "receiver": 5,
+        "size": 20
       }
     ]
   },
