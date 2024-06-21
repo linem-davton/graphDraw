@@ -371,20 +371,32 @@ function App() {
       });
 
       if (!response.ok) {
-        setErrorMessage(`HTTP error! status: ${response.status}`);
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
 
-      setScheduleData(() => {
-        setErrorMessage([]);
-        return data
-      });
-      console.log("Response from backend:", data);
+      // verify the response against the schema to ensure it is valid
+      // const ajv = new Ajv(); // options can be passed, e.g. {allErrors: true}
+      //const validate = ajv.compile(scheduleSchema);
+      //const valid = validate(data);
+
+      // Backend does the validation, so we can skip it here
+      const valid = true;
+
+      if (!valid) {
+        console.error('JSON Validation errors:', validate.errors);
+        setErrorMessage(['Schedule JSON does not match schema']);
+      } else {
+        setScheduleData(() => {
+          setErrorMessage([]);
+          return data
+        });
+        console.log("Response from backend:", data);
+      }
     } catch (error) {
       setErrorMessage([`Error Connecting to Server`]);
-      console.error("Error sending data to backend:", error);
+      console.error("Error Connecting to backend:", error);
     }
   };
 
