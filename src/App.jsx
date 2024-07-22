@@ -13,10 +13,10 @@ import Link from '@mui/material/Link';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import examplejson from './example1.json';
 import schema from './input_schema.json';
-import scheduleSchema from './ScheduleSchema.json'
 import { saveToLocalStorage, loadFromLocalStorage } from './utility';
 import { generateRandomAM, generateRandomPM } from './randomModels';
 import { ApplicationModal, PlatformModal } from './parametersModal';
+import ServerConfig from './ServerConfig.json'
 
 
 const theme = createTheme({
@@ -136,32 +136,15 @@ function App() {
     platformModalOpenRef.current = platformModalOpen;
   }, [platformModalOpen]);
 
+
   useEffect(() => {
     const data = loadFromLocalStorage('model');
     if (data) {
-      setSavedData(data);
       setApplicationModel(data.application);
       setPlatformModel(data.platform);
     }
   }, []);
 
-  const handleSave = () => {
-    const currentApplicationModel = applicationModelRef.current;
-    const currentPlatformModel = platformModelRef.current;
-    const dataToSave = {
-      application: currentApplicationModel,
-      platform: currentPlatformModel
-    };
-    saveToLocalStorage('model', dataToSave);
-    setSavedData(dataToSave);
-  };
-
-  const handleSavedLoad = () => {
-    if (savedData) {
-      setApplicationModel(savedData.application);
-      setPlatformModel(savedData.platform);
-    }
-  };
 
   const loadDefaultJSON = () => {
     setApplicationModel(examplejson.application);
@@ -311,8 +294,14 @@ function App() {
   };
 
   useEffect(() => {
-    if (applicationModel.tasks.length && platformModel.nodes.length)
+    if (applicationModel.tasks.length && platformModel.nodes.length) {
       scheduleGraph();
+      const dataToSave = {
+        application: applicationModel,
+        platform: platformModel
+      };
+      saveToLocalStorage('model', dataToSave);
+    }
   }, [applicationModel, platformModel])
 
   const downloadJsonFile = () => {
@@ -360,7 +349,7 @@ function App() {
     };
 
     try {
-      const response = await fetch('http://localhost:8000/schedule_jobs', {
+      const response = await fetch(ServerConfig.server + ServerConfig.schedule_jobs, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -376,10 +365,6 @@ function App() {
 
       const data = await response.json();
 
-      // verify the response against the schema to ensure it is valid
-      // const ajv = new Ajv(); // options can be passed, e.g. {allErrors: true}
-      //const validate = ajv.compile(scheduleSchema);
-      //const valid = validate(data);
 
       // Backend does the validation, so we can skip it here
       const valid = true;
@@ -548,8 +533,6 @@ function App() {
           {(applicationModel.tasks.length > 0 || platformModel.nodes.length > 0) && (
             <>
               <button className="button" onClick={downloadJsonFile}>Download JSON</button>
-
-              <button className="button" onClick={handleSave}>Save Locally</button>
             </>)
           }
 
