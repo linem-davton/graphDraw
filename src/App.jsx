@@ -1,43 +1,43 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from "react";
 
-import Ajv from 'ajv';
+import Ajv from "ajv";
 
-import './App.css';
-import SVGApplicationModel from './SVGApplicationModel';
-import SVGPlatformModel from './SVGPlatformModel'
-import SlidersAM from './slidersAM';
-import SlidersPM from './slidersPM';
-import ScheduleVisualization from './ScheduleVisualization';
-import Typography from '@mui/material/Typography';
-import Link from '@mui/material/Link';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import examplejson from './example1.json';
-import schema from './input_schema.json';
-import { saveToLocalStorage, loadFromLocalStorage } from './utility';
-import { generateRandomAM, generateRandomPM } from './randomModels';
-import { ApplicationModal, PlatformModal } from './parametersModal';
-import ServerConfig from './ServerConfig.json'
-
+import "./App.css";
+import SVGApplicationModel from "./SVGApplicationModel";
+import SVGPlatformModel from "./SVGPlatformModel";
+import SlidersAM from "./slidersAM";
+import SlidersPM from "./slidersPM";
+import ScheduleVisualization from "./ScheduleVisualization";
+import Typography from "@mui/material/Typography";
+import Link from "@mui/material/Link";
+import Switch from "@mui/material/Switch";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import examplejson from "./example1.json";
+import schema from "./input_schema.json";
+import { saveToLocalStorage, loadFromLocalStorage } from "./utility";
+import { generateRandomAM, generateRandomPM } from "./randomModels";
+import { ApplicationModal, PlatformModal } from "./parametersModal";
+import ServerConfig from "./ServerConfig.json";
 
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#00b894',
+      main: "#00b894",
     },
     secondary: {
-      main: '#00b894',
+      main: "#00b894",
     },
     background: {
-      default: '#2d3436',
+      default: "#2d3436",
     },
     text: {
-      primary: '#dfe6e9',
-    }
+      primary: "#dfe6e9",
+    },
   },
-
 });
 
-const nodeTypes = ['compute', 'router', 'sensor', 'actuator'];
+const nodeTypes = ["compute", "router", "sensor", "actuator"];
 const link_delay = 10;
 const bandwidth = 10;
 const link_type = "ethernet";
@@ -47,15 +47,20 @@ const wcet = 10;
 const mcet = 5;
 const deadline = 500;
 
-
-
+let serverUrl = ServerConfig.remoteServer;
 function App() {
-  const [applicationModel, setApplicationModel] = useState({ tasks: [], messages: [] })
-  const [platformModel, setPlatformModel] = useState({ nodes: [], links: [] })
+  const [applicationModel, setApplicationModel] = useState({
+    tasks: [],
+    messages: [],
+  });
+  const [platformModel, setPlatformModel] = useState({ nodes: [], links: [] });
   const [deleteMode, setDeleteMode] = useState(false);
   const [scheduleData, setScheduleData] = useState(null);
   const [errorMessage, setErrorMessage] = useState([]);
   const [selectedSVG, setSelectedSVG] = useState(null);
+  const [server, setServer] = useState(
+    localStorage.getItem("server") || "remote",
+  );
 
   const selectedSVGRef = useRef(selectedSVG);
   const applicationModelRef = useRef(applicationModel);
@@ -70,12 +75,18 @@ function App() {
   const [highlightedEdgePM, setHighlightedEdgePM] = useState(null);
   const highlightedEdgePMRef = useRef(highlightedEdgePM);
   const fileInputRef = useRef(null);
-  const [savedData, setSavedData] = useState(null);
 
   const [applicationModalOpen, setApplicationModalOpen] = useState(false);
   const [platformModalOpen, setPlatformModalOpen] = useState(false);
   const applicationModalOpenRef = useRef(applicationModalOpen);
   const platformModalOpenRef = useRef(platformModalOpen);
+
+  if (server === "remote") {
+    serverUrl = ServerConfig.remoteServer;
+  }
+  if (server === "local") {
+    serverUrl = ServerConfig.localServer;
+  }
 
   const handleApplicationOpenModal = () => {
     setApplicationModalOpen(true);
@@ -86,8 +97,19 @@ function App() {
   };
 
   const handleApplicationModalFormSubmit = (params) => {
-    console.log('Parameters:', params);
-    setApplicationModel(generateRandomAM(params.N, params.maxWCET, params.minWCET, params.minMCET, params.minDeadlineOffset, params.maxDeadline, params.linkProb, params.maxMessageSize));
+    console.log("Parameters:", params);
+    setApplicationModel(
+      generateRandomAM(
+        params.N,
+        params.maxWCET,
+        params.minWCET,
+        params.minMCET,
+        params.minDeadlineOffset,
+        params.maxDeadline,
+        params.linkProb,
+        params.maxMessageSize,
+      ),
+    );
     // Here you would call generateRandomAM with the params
   };
 
@@ -100,18 +122,39 @@ function App() {
   };
 
   const handlePlatformModalFormSubmit = (params) => {
-    console.log('Parameters:', params);
-    setPlatformModel(generateRandomPM(params.compute, params.routers, params.sensors, params.actuators, params.maxLinkDelay, params.minLinkDelay, params.maxBandwidth, params.minBandwidth));
+    console.log("Parameters:", params);
+    setPlatformModel(
+      generateRandomPM(
+        params.compute,
+        params.routers,
+        params.sensors,
+        params.actuators,
+        params.maxLinkDelay,
+        params.minLinkDelay,
+        params.maxBandwidth,
+        params.minBandwidth,
+      ),
+    );
   };
 
   useEffect(() => {
     selectedSVGRef.current = selectedSVG;
     if (selectedSVG === "ApplicationModel" && applicationModelSVGRef.current) {
-      applicationModelSVGRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      applicationModelSVGRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
     } else if (selectedSVG === "PlatformModel" && platformModelSVGRef.current) {
-      platformModelSVGRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      platformModelSVGRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
     }
   }, [selectedSVG]);
+
+  useEffect(() => {
+    localStorage.setItem("server", server);
+  }, [server]);
 
   useEffect(() => {
     applicationModelRef.current = applicationModel;
@@ -119,7 +162,7 @@ function App() {
 
   useEffect(() => {
     platformModelRef.current = platformModel;
-  }, [platformModel])
+  }, [platformModel]);
 
   useEffect(() => {
     highlightedTaskRef.current = highlightedTask;
@@ -136,122 +179,152 @@ function App() {
     platformModalOpenRef.current = platformModalOpen;
   }, [platformModalOpen]);
 
-
   useEffect(() => {
-    const data = loadFromLocalStorage('model');
+    const data = loadFromLocalStorage("model");
     if (data) {
       setApplicationModel(data.application);
       setPlatformModel(data.platform);
     }
   }, []);
 
-
   const loadDefaultJSON = () => {
     setApplicationModel(examplejson.application);
     setPlatformModel(examplejson.platform);
   };
 
-
   const addTasks = () => {
-    setApplicationModel(prevGraph => {
+    setApplicationModel((prevGraph) => {
       setHighlightedTask(prevGraph.tasks.length + 1);
       return {
         ...prevGraph,
-        tasks: [...prevGraph.tasks, { id: prevGraph.tasks.length + 1, wcet: wcet, mcet: mcet, deadline: deadline }]
-      }
-    })
+        tasks: [
+          ...prevGraph.tasks,
+          {
+            id: prevGraph.tasks.length + 1,
+            wcet: wcet,
+            mcet: mcet,
+            deadline: deadline,
+          },
+        ],
+      };
+    });
   };
 
   const addMessages = () => {
     const currentApplicationModel = applicationModelRef.current;
-    const sender = parseInt(prompt('Enter sender task:'));
-    const sourceNode = currentApplicationModel.tasks.find(node => node.id === sender);
+    const sender = parseInt(prompt("Enter sender task:"));
+    const sourceNode = currentApplicationModel.tasks.find(
+      (node) => node.id === sender,
+    );
     if (!sourceNode) {
       alert(`Task ${sender} does not exist`);
-      console.log('Task does not exist', applicationModel.tasks)
+      console.log("Task does not exist", applicationModel.tasks);
       return;
     }
 
-    const receiver = parseInt(prompt('Enter receiver task:'));
-    const targetNode = currentApplicationModel.tasks.find(node => node.id === receiver);
+    const receiver = parseInt(prompt("Enter receiver task:"));
+    const targetNode = currentApplicationModel.tasks.find(
+      (node) => node.id === receiver,
+    );
     if (!targetNode) {
       alert(`Task ${receiver} does not exist`);
       return;
     }
     if (sender === receiver) {
-      alert('Sender and receiver cannot be the same');
+      alert("Sender and receiver cannot be the same");
       return;
     }
-    const message_exists = currentApplicationModel.messages.some(edge => edge.sender === sender && edge.receiver === receiver);
+    const message_exists = currentApplicationModel.messages.some(
+      (edge) => edge.sender === sender && edge.receiver === receiver,
+    );
     if (message_exists) {
-      alert('Dependency already exists');
+      alert("Dependency already exists");
       return;
     }
 
     const msgId = currentApplicationModel.messages.length;
-    const message = { id: msgId, sender: sender, receiver: receiver, size: message_size, message_injection_time: message_injection_time }
+    const message = {
+      id: msgId,
+      sender: sender,
+      receiver: receiver,
+      size: message_size,
+      message_injection_time: message_injection_time,
+    };
 
-    setApplicationModel(prevGraph => ({
+    setApplicationModel((prevGraph) => ({
       ...prevGraph,
-      messages: [...prevGraph.messages, message]
+      messages: [...prevGraph.messages, message],
     }));
   };
 
   const addNodes = () => {
     const currentPlatformModel = platformModelRef.current;
 
-
     const nodeId = currentPlatformModel.nodes.length;
-    const type = parseInt(prompt('Enter node type: 0-compute, 1-router, 2-sensor, 3-actuator'));
+    const type = parseInt(
+      prompt("Enter node type: 0-compute, 1-router, 2-sensor, 3-actuator"),
+    );
     if (isNaN(type) || type < 0 || type > 3) {
-      alert('Invalid node type');
+      alert("Invalid node type");
       return;
     }
-    setPlatformModel(prevGraph => ({
+    setPlatformModel((prevGraph) => ({
       ...prevGraph,
-      nodes: [...prevGraph.nodes, { id: nodeId, type: nodeTypes[type] }]
+      nodes: [...prevGraph.nodes, { id: nodeId, type: nodeTypes[type] }],
     }));
   };
   const addLinks = () => {
     const currentPlatformModel = platformModelRef.current;
-    const sender = parseInt(prompt('Enter start node:'));
-    const sourceNode = currentPlatformModel.nodes.find(node => node.id === sender)
+    const sender = parseInt(prompt("Enter start node:"));
+    const sourceNode = currentPlatformModel.nodes.find(
+      (node) => node.id === sender,
+    );
     if (!sourceNode) {
-      alert('Node does not exist');
+      alert("Node does not exist");
       return;
     }
 
-    const receiver = parseInt(prompt('Enter receiver node:'));
-    const targetNode = currentPlatformModel.nodes.find(node => node.id === receiver);
+    const receiver = parseInt(prompt("Enter receiver node:"));
+    const targetNode = currentPlatformModel.nodes.find(
+      (node) => node.id === receiver,
+    );
     if (!targetNode) {
-      alert('Node does not exist');
+      alert("Node does not exist");
       return;
     }
     if (sender === receiver) {
-      alert('Start node and End node cannot be the same');
+      alert("Start node and End node cannot be the same");
       return;
     }
-    if (sourceNode.type !== 'router' && targetNode.type !== 'router') {
-      alert('One node must be a router');
+    if (sourceNode.type !== "router" && targetNode.type !== "router") {
+      alert("One node must be a router");
       return;
     }
-    const link_exists = currentPlatformModel.links.some(edge => edge.start_node === sender && edge.end_node === receiver);
+    const link_exists = currentPlatformModel.links.some(
+      (edge) => edge.start_node === sender && edge.end_node === receiver,
+    );
     if (link_exists) {
-      alert('Link already exists');
+      alert("Link already exists");
       return;
     }
 
     // Add the link
     const linkId = currentPlatformModel.links.length;
-    const link = { id: linkId, start_node: sender, end_node: receiver, link_delay: link_delay, bandwidth: bandwidth, type: link_type }
+    const link = {
+      id: linkId,
+      start_node: sender,
+      end_node: receiver,
+      link_delay: link_delay,
+      bandwidth: bandwidth,
+      type: link_type,
+    };
     if (!isNaN(link_delay)) {
-      setPlatformModel(prevGraph => ({
+      setPlatformModel((prevGraph) => ({
         ...prevGraph,
-        links: [...prevGraph.links, link]
+        links: [...prevGraph.links, link],
       }));
     }
     setHighlightedEdgePM({ start_node: sender, end_node: receiver });
-
   };
 
   const handleFileUpload = () => {
@@ -264,7 +337,6 @@ function App() {
     const file = event.target.files[0];
     if (!file) return;
     readFileContents(file);
-
   };
   const readFileContents = (file) => {
     const reader = new FileReader();
@@ -278,19 +350,18 @@ function App() {
         const valid = validate(parsedData);
 
         if (!valid) {
-          console.log('JSON Validation errors:', validate.errors);
-          setErrorMessage(['JSON data does not match schema']);
+          console.log("JSON Validation errors:", validate.errors);
+          setErrorMessage(["JSON data does not match schema"]);
         } else {
           setApplicationModel(parsedData.application);
           setPlatformModel(parsedData.platform);
         }
       } catch (error) {
-        setErrorMessage(['Upload Valid JSON'])
-        console.error('Error parsing JSON:', error);
+        setErrorMessage(["Upload Valid JSON"]);
+        console.error("Error parsing JSON:", error);
       }
     };
     reader.readAsText(file);
-
   };
 
   useEffect(() => {
@@ -298,35 +369,34 @@ function App() {
       scheduleGraph();
       const dataToSave = {
         application: applicationModel,
-        platform: platformModel
+        platform: platformModel,
       };
-      saveToLocalStorage('model', dataToSave);
+      saveToLocalStorage("model", dataToSave);
     }
-  }, [applicationModel, platformModel])
+  }, [applicationModel, platformModel]);
 
   const downloadJsonFile = () => {
     const currentApplicationModel = applicationModelRef.current;
     const currentPlatformModel = platformModelRef.current;
 
-
     const combinedJsonData = {
       application: currentApplicationModel,
-      platform: currentPlatformModel
+      platform: currentPlatformModel,
     };
 
     // Convert the combined JSON data to a string
     const jsonString = JSON.stringify(combinedJsonData, null, 2);
 
     // Create a Blob containing the JSON data
-    const blob = new Blob([jsonString], { type: 'application/json' });
+    const blob = new Blob([jsonString], { type: "application/json" });
 
     // Create a URL for the Blob
     const url = URL.createObjectURL(blob);
 
     // Create a link element
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
-    link.download = 'updated_data.json'; // Set the download attribute
+    link.download = "updated_data.json"; // Set the download attribute
 
     // Append the link to the document body
     document.body.appendChild(link);
@@ -338,25 +408,27 @@ function App() {
     document.body.removeChild(link);
   };
 
-
   const scheduleGraph = async () => {
-    if (!applicationModel?.tasks?.length > 0 || !platformModel?.nodes?.length > 0) {
-      setErrorMessage(['No jobs to schedule']);
+    if (
+      !applicationModel?.tasks?.length > 0 ||
+      !platformModel?.nodes?.length > 0
+    ) {
+      setErrorMessage(["No jobs to schedule"]);
       return;
     }
     const request = {
-      application: applicationModel, platform: platformModel
+      application: applicationModel,
+      platform: platformModel,
     };
 
     try {
-      const response = await fetch(ServerConfig.server + ServerConfig.schedule_jobs, {
-        method: 'POST',
+      const response = await fetch(serverUrl + ServerConfig.schedule_jobs, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
 
-        body: JSON.stringify(request)
-
+        body: JSON.stringify(request),
       });
 
       if (!response.ok) {
@@ -365,17 +437,15 @@ function App() {
 
       const data = await response.json();
 
-
       // Backend does the validation, so we can skip it here
       const valid = true;
 
       if (!valid) {
-        console.error('JSON Validation errors:', validate.errors);
-        setErrorMessage(['Schedule JSON does not match schema']);
+        setErrorMessage(["Schedule JSON does not match schema"]);
       } else {
         setScheduleData(() => {
           setErrorMessage([]);
-          return data
+          return data;
         });
         console.log("Response from backend:", data);
       }
@@ -387,15 +457,17 @@ function App() {
 
   const handleSVGClick = (svg) => {
     if (svg === "ApplicationModel")
-      setSelectedSVG(prev => prev === "ApplicationModel" ? null : "ApplicationModel");
+      setSelectedSVG((prev) =>
+        prev === "ApplicationModel" ? null : "ApplicationModel",
+      );
     else
-      setSelectedSVG(prev => prev === "PlatformModel" ? null : "PlatformModel");
+      setSelectedSVG((prev) =>
+        prev === "PlatformModel" ? null : "PlatformModel",
+      );
   };
-
 
   useEffect(() => {
     const handleKeyDown = (event) => {
-
       const currentApplicationModalOpen = applicationModalOpenRef.current;
       const currentPlatformModalOpen = platformModalOpenRef.current;
       // return if either of the modals are open
@@ -407,143 +479,215 @@ function App() {
       const currentPlatformModel = platformModelRef.current;
       const currentHighlightedTask = highlightedTaskRef.current;
       const currentHighlightedEdgePM = highlightedEdgePMRef.current;
-      const currentTaskIndex = currentApplicationModel.tasks.findIndex(node => node.id === currentHighlightedTask);
-      const currentLinkIndex = currentPlatformModel.links.findIndex(link => link.start_node === currentHighlightedEdgePM?.start_node && link.end_node === currentHighlightedEdgePM?.end_node);
-
+      const currentTaskIndex = currentApplicationModel.tasks.findIndex(
+        (node) => node.id === currentHighlightedTask,
+      );
+      const currentLinkIndex = currentPlatformModel.links.findIndex(
+        (link) =>
+          link.start_node === currentHighlightedEdgePM?.start_node &&
+          link.end_node === currentHighlightedEdgePM?.end_node,
+      );
 
       // Define the key combinations for the shortcuts
-      if (event.ctrlKey && event.key === 's') {
+      if (event.ctrlKey && event.key === "s") {
         event.preventDefault();
         downloadJsonFile();
-      }
-      else if (event.ctrlKey && event.key === 'o') {
+      } else if (event.ctrlKey && event.key === "o") {
         event.preventDefault();
         handleFileUpload();
-      }
-      else if (event.key === 'Tab') {
+      } else if (event.key === "Tab") {
         event.preventDefault();
-        setSelectedSVG(prev => prev === "ApplicationModel" ? "PlatformModel" : "ApplicationModel");
-      }
-      else if (event.key === '1') {
-        console.log('1 pressed');
+        setSelectedSVG((prev) =>
+          prev === "ApplicationModel" ? "PlatformModel" : "ApplicationModel",
+        );
+      } else if (event.key === "1") {
+        console.log("1 pressed");
         if (currentSelectedSVG === "ApplicationModel") {
-          console.log('Adding tasks');
-          addTasks()
+          console.log("Adding tasks");
+          addTasks();
+        } else if (currentSelectedSVG === "PlatformModel") {
+          addNodes();
         }
-        else if (currentSelectedSVG === "PlatformModel") {
-          addNodes()
-        }
-      }
-      else if (event.key === '2') {
+      } else if (event.key === "2") {
         if (currentSelectedSVG === "ApplicationModel") {
-          addMessages()
+          addMessages();
+        } else if (currentSelectedSVG === "PlatformModel") {
+          addLinks();
         }
-        else if (currentSelectedSVG === "PlatformModel") {
-          addLinks()
-        }
-      }
-      else if (event.key === 'Delete' || event.key === 'd') {
+      } else if (event.key === "Delete" || event.key === "d") {
         if (currentSelectedSVG === "ApplicationModel") {
-          const newTasks = currentApplicationModel.tasks.filter(node => node.id !== currentHighlightedTask);
-          const newMessages = currentApplicationModel.messages.filter(edge => edge.sender !== currentHighlightedTask && edge.receiver !== currentHighlightedTask);
-          setApplicationModel(prev => {
-            setHighlightedTask(currentTaskIndex === newTasks.length ? newTasks[newTasks.length - 1]?.id : newTasks[currentTaskIndex]?.id);
+          const newTasks = currentApplicationModel.tasks.filter(
+            (node) => node.id !== currentHighlightedTask,
+          );
+          const newMessages = currentApplicationModel.messages.filter(
+            (edge) =>
+              edge.sender !== currentHighlightedTask &&
+              edge.receiver !== currentHighlightedTask,
+          );
+          setApplicationModel((prev) => {
+            setHighlightedTask(
+              currentTaskIndex === newTasks.length
+                ? newTasks[newTasks.length - 1]?.id
+                : newTasks[currentTaskIndex]?.id,
+            );
             return { tasks: newTasks, messages: newMessages };
           });
-        }
-        else if (currentSelectedSVG === "PlatformModel") {
-          setPlatformModel(prevGraph => {
-            const newEdges = prevGraph.links.filter(e => !(e.start_node == currentHighlightedEdgePM.start_node && e.end_node == currentHighlightedEdgePM.end_node));
+        } else if (currentSelectedSVG === "PlatformModel") {
+          setPlatformModel((prevGraph) => {
+            const newEdges = prevGraph.links.filter(
+              (e) =>
+                !(
+                  e.start_node == currentHighlightedEdgePM.start_node &&
+                  e.end_node == currentHighlightedEdgePM.end_node
+                ),
+            );
             return { nodes: prevGraph.nodes, links: newEdges };
           });
         }
-      }
-      else if (event.ctrlKey && event.key === 'S') {
-        handleSave();
-
-      }
-      else if (event.key === 'w') {
+      } else if (event.key === "w") {
         if (currentSelectedSVG === "ApplicationModel") {
-          setHighlightedTask(currentApplicationModel.tasks[(currentTaskIndex + 1) % currentApplicationModel.tasks.length]?.id);
-        }
-        else if (currentSelectedSVG === "PlatformModel") {
-          setHighlightedEdgePM(prevLink => {
-            const link = currentPlatformModel.links[(currentLinkIndex + 1) % currentPlatformModel.links.length];
-            return { start_node: link?.start_node, end_node: link?.end_node }
+          setHighlightedTask(
+            currentApplicationModel.tasks[
+              (currentTaskIndex + 1) % currentApplicationModel.tasks.length
+            ]?.id,
+          );
+        } else if (currentSelectedSVG === "PlatformModel") {
+          setHighlightedEdgePM((prevLink) => {
+            const link =
+              currentPlatformModel.links[
+                (currentLinkIndex + 1) % currentPlatformModel.links.length
+              ];
+            return { start_node: link?.start_node, end_node: link?.end_node };
           });
-
         }
-      };
-
-    }
+      }
+    };
 
     // Add event listener for keydown events
-    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
 
     // Cleanup event listener on component unmount
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
-
-
 
   return (
     <ThemeProvider theme={theme}>
       <div className="app-container">
         <div className="sidebar">
-          <a href='https://github.com/linem-davton/graphdraw-frontend' target="_blank"><h1>Distributed Scheduling</h1></a>
+          <a
+            href="https://github.com/linem-davton/graphdraw-frontend"
+            target="_blank"
+          >
+            <h1>Distributed Scheduling</h1>
+          </a>
 
-          {(selectedSVG === "ApplicationModel") && (
+          {selectedSVG === "ApplicationModel" && (
             <>
-              <button className="button" onClick={addTasks}>Add Task</button>
-              {applicationModel.tasks.length > 1 &&
-                <button className="button" onClick={addMessages}>Add Task Dependency</button>
-              }
-              <button className="button" onClick={handleApplicationOpenModal}>Generate AM</button>
-            </>)
-          }
-          {(selectedSVG === "PlatformModel") && (
+              <button className="button" onClick={addTasks}>
+                Add Task
+              </button>
+              {applicationModel.tasks.length > 1 && (
+                <button className="button" onClick={addMessages}>
+                  Add Task Dependency
+                </button>
+              )}
+              <button className="button" onClick={handleApplicationOpenModal}>
+                Generate AM
+              </button>
+            </>
+          )}
+          {selectedSVG === "PlatformModel" && (
             <>
-              <button className="button" onClick={addNodes}>Add Node</button>
-              {platformModel.nodes.length > 1 &&
-                <button className="button" onClick={addLinks}>Add Link</button>
-              }
-              <button className="button" onClick={handlePlatformOpenModal}>Generate PM</button>
-            </>)
-          }
-          {((applicationModel.tasks.length > 0 || platformModel.nodes.length > 0) && selectedSVG !== null) && (
-            <>
-              <label className="checkbox-label">
-                <input type="checkbox" id="deleteMode" checked={deleteMode} onChange={() => {
-                  setDeleteMode(prev => !prev);
-                }} />
-                <span>Delete Mode</span>
-              </label>
-            </>)
-          }
+              <button className="button" onClick={addNodes}>
+                Add Node
+              </button>
+              {platformModel.nodes.length > 1 && (
+                <button className="button" onClick={addLinks}>
+                  Add Link
+                </button>
+              )}
+              <button className="button" onClick={handlePlatformOpenModal}>
+                Generate PM
+              </button>
+            </>
+          )}
+          {(applicationModel.tasks.length > 0 ||
+            platformModel.nodes.length > 0) &&
+            selectedSVG !== null && (
+              <>
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    id="deleteMode"
+                    checked={deleteMode}
+                    onChange={() => {
+                      setDeleteMode((prev) => !prev);
+                    }}
+                  />
+                  <span>Delete Mode</span>
+                </label>
+              </>
+            )}
           {selectedSVG === null && (
             <>
-              <input type="file" accept=".json" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileChange} />
-              <button className="button" onClick={handleFileUpload}>Upload JSON</button>
-              <button className="button" onClick={loadDefaultJSON}>Load Default JSON</button>
-              {savedData && <button className="button" onClick={handleSavedLoad}>Load Last Saved</button>}
-            </>)
-          }
-          {(applicationModel.tasks.length > 0 || platformModel.nodes.length > 0) && (
+              <input
+                type="file"
+                accept=".json"
+                ref={fileInputRef}
+                style={{ display: "none" }}
+                onChange={handleFileChange}
+              />
+              <button className="button" onClick={handleFileUpload}>
+                Upload JSON
+              </button>
+              <button className="button" onClick={loadDefaultJSON}>
+                Load Default JSON
+              </button>
+            </>
+          )}
+          {(applicationModel.tasks.length > 0 ||
+            platformModel.nodes.length > 0) && (
             <>
-              <button className="button" onClick={downloadJsonFile}>Download JSON</button>
-            </>)
-          }
+              <button className="button" onClick={downloadJsonFile}>
+                Download JSON
+              </button>
+            </>
+          )}
 
           <footer className="navbar">
+            <FormControlLabel
+              style={{ color: "white", margin: "auto" }}
+              control={
+                <Switch
+                  checked={server === "remote" ? true : false}
+                  onChange={() => {
+                    setServer(server === "remote" ? "local" : "remote");
+                  }}
+                  name="serverSwitch"
+                  color="primary"
+                />
+              }
+              label={`${server} server`}
+            />
             <Typography variant="body1" align="center" className="footer-link">
-              <Link href="https://eslab2docs.pages.dev/" underline="hover" target="_blank" rel="noopener noreferrer">
+              <Link
+                href="https://eslab2docs.pages.dev/"
+                underline="hover"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 Documentation
               </Link>
             </Typography>
             <Typography variant="body1" align="center" className="footer-link">
-              <Link href="https://github.com/linem-davton/es-lab-task2" underline="hover" target="_blank" rel="noopener noreferrer">
+              <Link
+                href="https://github.com/linem-davton/es-lab-task2"
+                underline="hover"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 GitHub Backend
               </Link>
             </Typography>
@@ -552,8 +696,18 @@ function App() {
 
         <div className="main-content">
           <div className="svg-container">
-            <div className="ApplicationMode" ref={applicationModelSVGRef} onClick={() => handleSVGClick("ApplicationModel")}>
-              <h2 className={selectedSVG === "ApplicationModel" ? "active" : "inactive"}>Application Model</h2>
+            <div
+              className="ApplicationMode"
+              ref={applicationModelSVGRef}
+              onClick={() => handleSVGClick("ApplicationModel")}
+            >
+              <h2
+                className={
+                  selectedSVG === "ApplicationModel" ? "active" : "inactive"
+                }
+              >
+                Application Model
+              </h2>
               <SVGApplicationModel
                 graph={applicationModel}
                 setGraph={setApplicationModel}
@@ -565,11 +719,26 @@ function App() {
                 selectedSVG={selectedSVG}
               />
             </div>
-            {highlightedTask !== null && <SlidersAM highlightNode={highlightedTask} graph={applicationModel} setGraph={setApplicationModel} />}
+            {highlightedTask !== null && (
+              <SlidersAM
+                highlightNode={highlightedTask}
+                graph={applicationModel}
+                setGraph={setApplicationModel}
+              />
+            )}
 
-            <div className="PlatformModel" ref={platformModelSVGRef} onClick={() => handleSVGClick("PlatformModel")}>
-
-              <h2 className={selectedSVG === "PlatformModel" ? "active" : "inactive"}>Platform Model</h2>
+            <div
+              className="PlatformModel"
+              ref={platformModelSVGRef}
+              onClick={() => handleSVGClick("PlatformModel")}
+            >
+              <h2
+                className={
+                  selectedSVG === "PlatformModel" ? "active" : "inactive"
+                }
+              >
+                Platform Model
+              </h2>
               <SVGPlatformModel
                 graph={platformModel}
                 setGraph={setPlatformModel}
@@ -581,27 +750,36 @@ function App() {
                 selectedSVG={selectedSVG}
               />
             </div>
-            {highlightedEdgePM && <SlidersPM highlightedEdge={highlightedEdgePM} graph={platformModel} setGraph={setPlatformModel} />}
+            {highlightedEdgePM && (
+              <SlidersPM
+                highlightedEdge={highlightedEdgePM}
+                graph={platformModel}
+                setGraph={setPlatformModel}
+              />
+            )}
           </div>
-          {scheduleData &&
+          {scheduleData && (
             <div className="schedule-data">
-              <ScheduleVisualization schedules={scheduleData} setErrorMessage={setErrorMessage} />
-            </div>}
+              <ScheduleVisualization
+                schedules={scheduleData}
+                setErrorMessage={setErrorMessage}
+              />
+            </div>
+          )}
         </div>
-
-      </div >
-      {
-        errorMessage.length > 0 &&
+      </div>
+      {errorMessage.length > 0 && (
         <div className="error-message">
           {errorMessage.map((error, index) => {
-            return (< React.Fragment key={index} >
-              {error}
-              < br />
-            </React.Fragment>);
-          })
-          }
+            return (
+              <React.Fragment key={index}>
+                {error}
+                <br />
+              </React.Fragment>
+            );
+          })}
         </div>
-      }
+      )}
       <ApplicationModal
         isOpen={applicationModalOpen}
         onClose={handleApplicationCloseModal}
@@ -612,9 +790,7 @@ function App() {
         onClose={handlePlatformCloseModal}
         onSubmit={handlePlatformModalFormSubmit}
       />
-
-    </ThemeProvider >
-
+    </ThemeProvider>
   );
 }
 export default App;

@@ -1,4 +1,5 @@
 {
-  "server": "",
-  "schedule_jobs": "/submit/eslab/estask2/proxy/schedule_jobs"
+  "remoteServer": "/submit/eslab/estask2/proxy",
+  "localServer": "http://localhost:8000",
+  "schedule_jobs": "/schedule_jobs"
 }
