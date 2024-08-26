@@ -51,9 +51,10 @@ body {
 
 /* Styles for the app layout */
 .app-container {
-  display: flex;
-  flex-direction: row;
+  margin: 0;
+  padding: 0;
   min-height: 100vh; /* Full height of the viewport */
+  overflow: hidden; /* Hide the scrollbar */
 }
 
 .sidebar {
@@ -334,38 +335,43 @@ h1:hover {
     width: 25%;
   }
   .main-content {
-    flex: 1;
     flex-direction: column;
-    justify-content: center;
-    margin: 0 0 0 28%;
-    overflow-x: auto;
+    justify-content: flex-start;
+    margin: 0 0 0 25%;
+    max-width: 75%;
+    max-height: 100vh;
+    overflow: hidden;
   }
-  .schedule-data {
-    margin: 20px 0;
+  .svg-container {
+    padding: 1rem;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--headline-color);
+  }
+  .schedule-graphs {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
   }
 }
 
 @media (max-width: 700px) {
-  .app-container {
-    flex-direction: column;
-  }
-  .main-content {
-    margin-left: 0;
-    margin: 0;
-  }
   .sidebar {
     position: static;
     width: 100%;
+    max-width: 100%;
     height: auto;
     min-height: auto;
     flex-direction: row;
     overflow-x: auto;
   }
-  .svg-container {
+  .main-content {
+    margin: 0;
     width: 100%;
-    align-items: center;
-    justify-content: center;
+    max-width: 100%;
   }
+
   footer.navbar {
     margin: auto 10px;
     flex-direction: row;
