@@ -4,27 +4,49 @@
 :root {
   --main-bg: #2d3436;
   --sidebar-bg: #191b1b;
-  --button-bg: #00b894 ;
+  --button-bg: #00b894;
   --button-hover-bg: #09856a;
   --headline-color: #dfe6e9;
   --text-color: #2f3640;
   --spinner-color: #00b894;
   --svg-border: #636e72;
   --svg-container: #353b48;
-  --svg-container-hover:#2f3640;
-  --svg-conatiner-active:#4b5161;
-  --svg-circle-fill:#00b894;
-  --svg-circle-selected:red; 
+  --svg-container-hover: #2f3640;
+  --svg-conatiner-active: #4b5161;
+  --svg-circle-fill: #00b894;
+  --svg-circle-selected: red;
   --svg-cirlce-stroke: #dfe6e9;
   --svg-line-stroke: #dfe6e9;
 }
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   height: 100%;
   width: 100%;
   background: var(--main-bg); /* Dark background color */
+}
+
+/* For Webkit (Chrome, Safari) */
+*::-webkit-scrollbar {
+  width: 8px; /* width of the entire scrollbar */
+}
+
+*::-webkit-scrollbar-track {
+  background: #2e2e2e; /* color of the track */
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #555; /* color of the scroll thumb */
+  border-radius: 10px; /* roundness of the scroll thumb */
+  border: 2px solid #2e2e2e; /* creates padding around scroll thumb */
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin; /* "auto" or "thin" */
+  scrollbar-color: #555 #2e2e2e; /* thumb and track color */
 }
 
 /* Styles for the app layout */
@@ -52,19 +74,35 @@ html, body {
 
 .main-content {
   margin-left: 16%; /* Match the width of the sidebar */
-  flex:1;
+  flex: 1;
   display: flex;
   flex: 1;
   flex-direction: row;
   align-items: flex-start;
   justify-content: flex-start;
-  height: 100%;
+  max-height: 100vh;
+  overflow: hidden;
 }
 
 .svg-container {
   flex: 1;
-  height:100%; /* Full width of its container */
+  padding: 2rem 1rem;
+  max-height: 100%;
+  overflow: auto;
 }
+
+.schedule-graphs {
+  padding: 2rem 1rem;
+  max-height: 100%;
+  overflow: auto;
+}
+
+.schedule-data {
+  display: flex;
+
+  flex-direction: column;
+}
+
 footer.navbar {
   display: flex;
   flex-direction: column;
@@ -75,17 +113,6 @@ footer.navbar .footer-link {
   font-size: 1.5rem;
 }
 
-
-.schedule-data {
-  margin: 0 20px;
-  position: sticky;
-  top: 0;
-  display: flex;
-  position: sticky;
-  top: 0;
-  flex-direction: column;
-}
-
 /* Error Messages */
 .error-message {
   position: fixed;
@@ -93,7 +120,7 @@ footer.navbar .footer-link {
   left: 50%;
   transform: translateX(-50%);
   background: var(--button-bg);
-  color: #2d3436; 
+  color: #2d3436;
   padding: 30px 30px;
   border-radius: 4px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
@@ -101,23 +128,24 @@ footer.navbar .footer-link {
   color: black;
 }
 /* Button Styling */
-.button, .checkbox-label {
+.button,
+.checkbox-label {
   background-color: var(--button-bg); /* Blue color for buttons */
   color: var(--text-color);
   font-size: 1.2rem;
   padding: 20px; /* Increased padding for more height */
-  margin: 15px  10px; /* Space between buttons */
+  margin: 15px 10px; /* Space between buttons */
   border: none;
   border-radius: 30px;
   cursor: pointer;
   text-align: center;
   transition: all 1 ease-in-out;
-  display: block; 
+  display: block;
 }
 
 .button:hover,
 .checkbox-label:hover {
-  background-color:var(--button-hover-bg); /* Darker blue on hover */
+  background-color: var(--button-hover-bg); /* Darker blue on hover */
   color: var(--headline-color);
   transform: scale(1.05);
 }
@@ -135,9 +163,8 @@ footer.navbar .footer-link {
   justify-content: center;
 }
 a {
-   text-decoration: none;
+  text-decoration: none;
 }
-
 
 /* Styles for the SVG container */
 
@@ -150,7 +177,6 @@ a {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Subtle shadow around SVG */
 }
 
-
 svg:hover {
   border: 1px solid var(--button-hover-bg);
   background: var(--svg-container-hover);
@@ -160,7 +186,6 @@ svg.active {
   border: 4px solid var(--button-bg);
   background: var(--svg-conatiner-active);
 }
-
 
 /* Style for nodes (circles) within the SVG */
 .svg-container svg circle {
@@ -173,7 +198,6 @@ svg circle:hover {
   stroke: #00695c; /* Darker teal for stroke */
 }
 
-
 .svg-container svg circle.highlighted-circle {
   fill: var(--svg-circle-selected); /* Red color for selected nodes */
 }
@@ -184,26 +208,25 @@ svg circle:hover {
 
 .svg-container svg circle.router:hover {
   fill: #cc6600; /* Blue color for selected nodes */
-  stroke: #8B4513;
+  stroke: #8b4513;
 }
 
 .svg-container svg circle.sensor {
-  fill: #4393E9; /* Blue color for selected nodes */
+  fill: #4393e9; /* Blue color for selected nodes */
 }
 .svg-container svg circle.sensor:hover {
-    fill: #2980b9; /* Darker blue for hover */
+  fill: #2980b9; /* Darker blue for hover */
   stroke: #1a5276; /* Navy blue for stroke */
- }
+}
 
 .svg-container svg circle.actuator {
-  fill: #F56C51; /* Red color for selected nodes */
+  fill: #f56c51; /* Red color for selected nodes */
 }
 
 .svg-container svg circle.actuator:hover {
- fill: #e74c3c; /* Brighter red for hover */
-  stroke: #8B0000; /* Dark red for stroke */
+  fill: #e74c3c; /* Brighter red for hover */
+  stroke: #8b0000; /* Dark red for stroke */
 }
-
 
 /* Style for text within the SVG */
 .svg-container svg text {
@@ -226,7 +249,6 @@ svg circle:hover {
   stroke: var(--button-bg);
 }
 
-
 .sliders {
   display: flex;
   flex-direction: column;
@@ -240,13 +262,14 @@ svg circle:hover {
   margin-right: 10px;
 }
 
-h1, h2 {
+h1,
+h2 {
   color: var(--headline-color);
-  text-align:center;
+  text-align: center;
   margin-bottom: 20px;
   transition: all 1 ease-in-out;
 }
-h2{
+h2 {
   font-size: 1.5rem;
 }
 h2.active {
@@ -254,12 +277,12 @@ h2.active {
   color: var(--button-bg);
 }
 
-h1{
+h1 {
   font-size: 2.5rem;
 }
 h1:hover {
   color: var(--button-hover-bg);
-  font-size:2.55rem;
+  font-size: 2.55rem;
 }
 
 .modal {
@@ -268,7 +291,7 @@ h1:hover {
   top: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0,0,0,0.5);
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -282,17 +305,17 @@ h1:hover {
   border-radius: 20px;
   width: 400px;
 }
-.modal-content h2{ 
+.modal-content h2 {
   text-align: center;
   color: var(--button-bg);
   margin-bottom: 20px;
 }
-.modal-content button{ 
+.modal-content button {
   display: block;
   margin: 40px auto 10px auto;
   padding: 10px 40px;
 }
-.modal-inputs{
+.modal-inputs {
   display: grid;
   grid-template-columns: 2fr 1fr; /* Creates a two-column layout */
   grid-gap: 10px; /* Adds space between rows and columns */
@@ -310,7 +333,7 @@ h1:hover {
   .sidebar {
     width: 25%;
   }
-   .main-content {
+  .main-content {
     flex: 1;
     flex-direction: column;
     justify-content: center;
@@ -320,30 +343,28 @@ h1:hover {
   .schedule-data {
     margin: 20px 0;
   }
-
 }
 
 @media (max-width: 700px) {
-  .app-container{
+  .app-container {
     flex-direction: column;
   }
   .main-content {
     margin-left: 0;
     margin: 0;
   }
-   .sidebar{
+  .sidebar {
     position: static;
     width: 100%;
     height: auto;
     min-height: auto;
-    flex-direction:row;
+    flex-direction: row;
     overflow-x: auto;
   }
-  .svg-container{
-    width:100%;
+  .svg-container {
+    width: 100%;
     align-items: center;
-    justify-content:center;
-
+    justify-content: center;
   }
   footer.navbar {
     margin: auto 10px;
@@ -353,13 +374,13 @@ h1:hover {
   footer.navbar .footer-link {
     margin: 0 10px;
     font-size: 0.8rem;
-      
   }
-  .button, .checkbox-label {
+  .button,
+  .checkbox-label {
     font-size: 1rem;
     padding: 10px;
     margin: 5px 15px;
-    flex:1;
+    flex: 1;
     white-space: nowrap;
     text-overflow: ellipsis;
     box-sizing: border-box;

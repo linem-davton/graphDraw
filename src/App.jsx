@@ -759,11 +759,13 @@ function App() {
             )}
           </div>
           {scheduleData && (
-            <div className="schedule-data">
-              <ScheduleVisualization
-                schedules={scheduleData}
-                setErrorMessage={setErrorMessage}
-              />
+            <div className="schedule-graphs">
+              <div className="schedule-data">
+                <ScheduleVisualization
+                  schedules={scheduleData}
+                  setErrorMessage={setErrorMessage}
+                />
+              </div>
             </div>
           )}
         </div>
