@@ -74,33 +74,34 @@ body {
 }
 
 .main-content {
-  margin-left: 16%; /* Match the width of the sidebar */
-  flex: 1;
+  margin-left: 15%; /* Match the width of the sidebar */
+  width: 85%;
   display: flex;
-  flex: 1;
   flex-direction: row;
   align-items: flex-start;
   justify-content: flex-start;
+  height: 100vh;
   max-height: 100vh;
   overflow: hidden;
 }
 
 .svg-container {
   flex: 1;
-  padding: 2rem 1rem;
+  padding: 1rem 1rem 0rem 1.5rem;
+  height: 100%;
   max-height: 100%;
   overflow: auto;
 }
 
 .schedule-graphs {
-  padding: 2rem 1rem;
+  padding: 1rem 1rem 0rem 1.5rem;
+  height: 100%;
   max-height: 100%;
   overflow: auto;
 }
 
 .schedule-data {
   display: flex;
-
   flex-direction: column;
 }
 
