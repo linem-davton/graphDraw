@@ -1,13 +1,14 @@
 import * as d3 from "d3";
-import { memo } from "react";
+import { memo, useEffect } from "react";
 
 const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+const graphWidth = 600;
+const graphHeight = 300;
 
 const scheduleGraphs = memo(({ schedules, setErrorMessage }) => {
-  const graphWidth = 600;
-  const graphHeight = 300;
+  if (!schedules) return;
 
-  if (schedules) {
+  useEffect(() => {
     Object.keys(schedules).forEach((scheduleKey) => {
       const svg = d3.select(`#${scheduleKey}`);
       const margin = { top: 80, right: 10, bottom: 50, left: 50 }; // Increased top margin for algorithm name
@@ -104,11 +105,11 @@ const scheduleGraphs = memo(({ schedules, setErrorMessage }) => {
         .attr("x", (d) => xScale(d.start_time) + 10)
         .attr("y", (d) => yScale(d.node_id) + yScale.bandwidth() / 2)
         .attr("dy", "0.35em")
-        .text((d) => `Task ${d.task_id}`)
+        .text((d) => `${d.task_id}`)
         .style("fill", "#dfe6e9")
-        .style("font-size", "12px");
+        .style("font-size", "16px");
     });
-  }
+  }, [schedules]);
   return (
     <>
       {Object.entries(schedules).map(([schedule]) => (
