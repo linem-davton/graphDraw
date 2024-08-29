@@ -336,12 +336,12 @@ h1:hover {
     width: 25%;
   }
   .main-content {
-    flex-direction: column;
-    justify-content: flex-start;
+    display: grid;
     margin: 0 0 0 25%;
     max-width: 75%;
-    max-height: 100vh;
-    overflow: hidden;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
+    grid-gap: 3rem;
   }
   .svg-container {
     padding: 1rem;
