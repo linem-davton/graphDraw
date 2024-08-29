@@ -48,6 +48,7 @@ const mcet = 5;
 const deadline = 500;
 
 let serverUrl = ServerConfig.remoteServer;
+
 function App() {
   const [applicationModel, setApplicationModel] = useState({
     tasks: [],
