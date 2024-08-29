@@ -95,7 +95,7 @@ const scheduleGraphs = ({ schedules, setErrorMessage }) => {
         .attr("text-anchor", "middle")
         .text(algorithmName)
         .style("fill", "#00b894")
-        .style("font-size", "1.5rem")
+        .style("font-size", "1.2rem")
         .style("font-weight", "bold");
 
       const schedule = schedules[scheduleKey].schedule;

@@ -23,8 +23,6 @@ html,
 body {
   margin: 0;
   padding: 0;
-  height: 100%;
-  width: 100%;
   background: var(--main-bg); /* Dark background color */
 }
 
@@ -351,9 +349,9 @@ h1:hover {
   }
 
   .svg-container {
-    padding: 1rem;
-    width: 100%;
-    padding: 0rem 2rem;
+    margin: auto;
+    overflow-x: hidden;
+    padding: 0;
     max-width: 100%;
     border-bottom: 1px solid var(--headline-color);
   }
@@ -368,6 +366,12 @@ h1:hover {
 }
 
 @media (max-width: 700px) {
+  h1 {
+    font-size: 1.5rem;
+  }
+  .app-container {
+    max-height: 100vh;
+  }
   .sidebar {
     position: static;
     width: 100%;
@@ -381,6 +385,10 @@ h1:hover {
     margin: 0;
     width: 100%;
     max-width: 100%;
+    height: auto;
+  }
+  .svg-container {
+    padding-right: 0.5rem;
   }
 
   footer.navbar {
